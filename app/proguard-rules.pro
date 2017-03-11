@@ -15,3 +15,14 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-dontwarn ch.qos.logback.**
+-keep class ch.qos.logback.** {*;}
+-dontwarn org.glassfish.**
+-keep class org.glassfish.** {*;}
+-dontwarn com.google.common.**
+-keep class com.google.common.** {*;}
+-dontwarn com.ullink.slack.**
+-keep class com.ullink.slack.** {*;}
+-dontwarn org.apache.http.**
+-keep class org.apache.http.** {*;}
