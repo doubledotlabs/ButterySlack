@@ -14,8 +14,10 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.data.ItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
@@ -49,7 +51,7 @@ public class ChannelFragment extends ChatFragment {
             protected void done(@Nullable SlackChannel result) {
                 if (result != null) {
                     channel = result;
-                    setTitle(result.getName());
+                    setTitle(String.format(Locale.getDefault(), getString(R.string.title_channel), result.getName()));
                     registerListener();
                 }
             }
