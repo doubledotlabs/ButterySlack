@@ -67,6 +67,11 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         return true;
     }
 
+    final void addMessages(List<ItemData> messages) {
+        this.messages.addAll(messages);
+        adapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onEvent(final SlackMessagePosted event, SlackSession session) {
         if (isMessageInChannel(event)) {
