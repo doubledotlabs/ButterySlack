@@ -27,7 +27,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemData.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ItemData.ViewHolder holder, int position) {
-        items.get(position).onBindViewHolder(holder, position);
+        try {
+            items.get(position).onBindViewHolder(holder, position);
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
 
         holder.itemView.setAlpha(0);
         holder.itemView.animate().alpha(1).setDuration(500).start();

@@ -10,7 +10,7 @@ import android.widget.TextView;
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
 
-public abstract class ItemData implements View.OnClickListener {
+public abstract class ItemData<T extends ItemData.ViewHolder> implements View.OnClickListener {
 
     private Context context;
     private ButterySlack butterySlack;
@@ -34,23 +34,18 @@ public abstract class ItemData implements View.OnClickListener {
         return identifier;
     }
 
-    public ViewHolder getViewHolder(LayoutInflater inflater, ViewGroup parent) {
-        return new ViewHolder(inflater.inflate(R.layout.item_text, parent, false));
-    }
+    public abstract T getViewHolder(LayoutInflater inflater, ViewGroup parent);
 
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(T holder, int position) {
         if (identifier != null) {
-            TextView title = (TextView) holder.v.findViewById(R.id.title);
-            TextView subtitle = (TextView) holder.v.findViewById(R.id.subtitle);
-
-            if (title != null)
-                title.setText(identifier.getTitle());
-            if (subtitle != null) {
+            if (holder.title != null)
+                holder.title.setText(identifier.getTitle());
+            if (holder.subtitle != null) {
                 String text = identifier.getSubtitle();
                 if (text.length() > 0) {
-                    subtitle.setVisibility(View.VISIBLE);
-                    subtitle.setText(text);
-                } else subtitle.setVisibility(View.GONE);
+                    holder.subtitle.setVisibility(View.VISIBLE);
+                    holder.subtitle.setText(text);
+                } else holder.subtitle.setVisibility(View.GONE);
             }
         }
 
@@ -81,11 +76,15 @@ public abstract class ItemData implements View.OnClickListener {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+
         View v;
+        TextView title, subtitle;
 
         public ViewHolder(View v) {
             super(v);
             this.v = v;
+            title = (TextView) v.findViewById(R.id.title);
+            subtitle = (TextView) v.findViewById(R.id.subtitle);
         }
     }
 }
