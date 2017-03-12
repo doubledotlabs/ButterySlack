@@ -20,6 +20,7 @@ import java.util.List;
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.ItemAdapter;
 import doubledotlabs.butteryslack.data.ItemData;
+import doubledotlabs.butteryslack.data.LoadingItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
 
@@ -30,12 +31,13 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     private RecyclerView recyclerView;
     private ItemAdapter adapter;
+    private LoadingItemData loadingItem;
+    private int pagesLoaded;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
-        messages = new ArrayList<>();
         handler = new Handler(Looper.getMainLooper());
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
@@ -43,6 +45,23 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(layoutManager);
+
+        messages = new ArrayList<>();
+        loadingItem = new LoadingItemData(getContext()) {
+            @Override
+            public void onBindViewHolder(ViewHolder holder, int position) {
+                String timestamp = "0";
+                if (messages.size() > 1) {
+                    ItemData message = messages.get(messages.indexOf(loadingItem) - 1);
+                    if (message instanceof MessageItemData)
+                        timestamp = ((MessageItemData) message).getTimestamp();
+                }
+                loadPage(pagesLoaded, timestamp);
+                pagesLoaded++;
+            }
+        };
+
+        messages.add(loadingItem);
 
         adapter = new ItemAdapter(getContext(), messages);
         recyclerView.setAdapter(adapter);
@@ -62,14 +81,17 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     abstract boolean isMessageInChannel(SlackMessagePosted event);
 
+    abstract void loadPage(int page, String timestamp);
+
     @Override
     public boolean shouldShowBackButton() {
         return true;
     }
 
-    final void addMessages(List<ItemData> messages) {
-        this.messages.addAll(messages);
-        adapter.notifyDataSetChanged();
+    final void onPageLoaded(List<ItemData> messages) {
+        int start = this.messages.indexOf(loadingItem);
+        this.messages.addAll(start, messages);
+        adapter.notifyItemRangeInserted(start, start + messages.size());
     }
 
     @Override
@@ -78,7 +100,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    messages.add(0, new MessageItemData(getContext(), new ItemData.Identifier(event.getMessageContent(), event.getTimestamp()), event));
+                    messages.add(0, new MessageItemData(getContext(), event));
                     adapter.notifyItemInserted(0);
                 }
             });

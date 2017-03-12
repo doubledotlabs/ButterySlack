@@ -5,17 +5,46 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ullink.slack.simpleslackapi.events.SlackMessageEvent;
+import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
 import doubledotlabs.butteryslack.R;
 
 public class MessageItemData extends ItemData {
 
-    private SlackMessageEvent event;
+    private String senderId, senderName;
+    private String content;
+    private String timestamp;
 
-    public MessageItemData(Context context, Identifier identifier, SlackMessageEvent event) {
-        super(context, identifier);
-        this.event = event;
+    public MessageItemData(Context context, String senderId, String senderName, String content, String timestamp) {
+        super(context, new Identifier(senderName, content));
+        this.senderId = senderId;
+        this.senderName = senderName;
+        this.content = content;
+        this.timestamp = timestamp;
+    }
+
+    public MessageItemData(Context context, SlackMessagePosted event) {
+        super(context, new Identifier(event.getSender().getUserName(), event.getMessageContent()));
+        senderId = event.getSender().getId();
+        senderName = event.getSender().getRealName();
+        content = event.getMessageContent();
+        timestamp = event.getTimestamp();
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 
     @Override
