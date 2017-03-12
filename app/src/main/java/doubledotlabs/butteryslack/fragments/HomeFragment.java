@@ -61,7 +61,8 @@ public class HomeFragment extends ButteryFragment {
             protected void done(@Nullable Collection<SlackChannel> result) {
                 if (result != null) {
                     for (SlackChannel channel : result) {
-                        channels.add(new ChannelItemData(getContext(), channel));
+                        if (channel.getName() != null)
+                            channels.add(new ChannelItemData(getContext(), channel));
                     }
                     adapter.notifyDataSetChanged();
                 }
