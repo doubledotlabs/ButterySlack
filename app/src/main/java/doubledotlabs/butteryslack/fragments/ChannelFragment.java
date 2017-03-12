@@ -3,13 +3,15 @@ package doubledotlabs.butteryslack.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.JsonReader;
 
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackChannel;
+import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
-import java.io.StringReader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,12 +63,12 @@ public class ChannelFragment extends ChatFragment {
     }
 
     @Override
-    void loadPage(final int page, final String timestamp) {
-        new Action<List<ItemData>>() {
+    Action<List<ItemData>> loadPage(final String timestamp) {
+        return new Action<List<ItemData>>() {
             @NonNull
             @Override
             public String id() {
-                return "page" + page;
+                return "page" + timestamp;
             }
 
             @Nullable
@@ -78,51 +80,27 @@ public class ChannelFragment extends ChatFragment {
 
                 List<ItemData> messages = new ArrayList<>();
 
-                String json = getButterySlack().session.postGenericSlackCommand(params, "channels.history").getReply().getPlainAnswer().toJSONString();
-                JsonReader reader = new JsonReader(new StringReader(json));
-                reader.setLenient(true);
+                JSONObject json = getButterySlack().session.postGenericSlackCommand(params, "channels.history").getReply().getPlainAnswer();
+                JSONArray array = (JSONArray) json.get("messages");
 
-                try {
-                    reader.beginObject();
-                    while (reader.hasNext()) {
-                        if (reader.nextName().equals("messages")) {
-                            reader.beginArray();
-                            while (reader.hasNext()) {
-                                reader.beginObject();
+                for (Object object : array) {
+                    JSONObject message = (JSONObject) object;
+                    switch ((String) message.get("type")) {
+                        case "message":
+                            String senderId = (String) message.get("user"), senderName = "";
+                            SlackUser user = getButterySlack().session.findUserById(senderId);
+                            if (user != null)
+                                senderName = user.getUserName();
 
-                                String type = "", senderId = "", senderName = "", content = "", timestamp = "";
-                                while (reader.hasNext()) {
-                                    switch (reader.nextName()) {
-                                        case "type":
-                                            type = reader.nextString();
-                                            break;
-                                        case "user":
-                                            senderId = reader.nextString();
-                                            senderName = getButterySlack().session.findUserById(senderId).getUserName();
-                                            break;
-                                        case "text":
-                                            content = reader.nextString();
-                                            break;
-                                        case "ts":
-                                            timestamp = reader.nextString();
-                                            break;
-                                        default:
-                                            reader.skipValue();
-                                            break;
-                                    }
-                                }
-
-                                if (type.equals("message")) {
-                                    messages.add(new MessageItemData(getContext(), senderId, senderName, content, timestamp));
-                                }
-                                reader.endObject();
-                            }
-                            reader.endArray();
-                        } else reader.skipValue();
+                            messages.add(new MessageItemData(
+                                    getContext(),
+                                    senderId,
+                                    senderName,
+                                    (String) message.get("text"),
+                                    (String) message.get("ts")
+                            ));
+                            break;
                     }
-                    reader.endObject();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
 
                 return messages;
@@ -131,10 +109,10 @@ public class ChannelFragment extends ChatFragment {
             @Override
             protected void done(@Nullable List<ItemData> result) {
                 if (result != null) {
-                    onPageLoaded(result);
+                    onPageLoaded(timestamp, result);
                 }
             }
-        }.execute();
+        };
     }
 
 }

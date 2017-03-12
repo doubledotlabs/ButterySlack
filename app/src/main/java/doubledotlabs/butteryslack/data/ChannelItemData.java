@@ -3,7 +3,9 @@ package doubledotlabs.butteryslack.data;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.ullink.slack.simpleslackapi.SlackChannel;
 
@@ -17,6 +19,11 @@ public class ChannelItemData extends ItemData {
     public ChannelItemData(Context context, SlackChannel channel) {
         super(context, new Identifier(channel.getName(), channel.getTopic()));
         this.channel = channel;
+    }
+
+    @Override
+    public ViewHolder getViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new ViewHolder(inflater.inflate(R.layout.item_channel, parent, false));
     }
 
     @Override
