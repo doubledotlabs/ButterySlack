@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackChannel;
-import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
 import org.json.simple.JSONArray;
@@ -87,15 +86,9 @@ public class ChannelFragment extends ChatFragment {
                     JSONObject message = (JSONObject) object;
                     switch ((String) message.get("type")) {
                         case "message":
-                            String senderId = (String) message.get("user"), senderName = "";
-                            SlackUser user = getButterySlack().session.findUserById(senderId);
-                            if (user != null)
-                                senderName = user.getUserName();
-
                             messages.add(new MessageItemData(
                                     getContext(),
-                                    senderId,
-                                    senderName,
+                                    getButterySlack().session.findUserById((String) message.get("user")),
                                     (String) message.get("text"),
                                     (String) message.get("ts")
                             ));
