@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Buttery Slack</string>
+    <string name="title_settings">Settings</string>
 </resources>
