@@ -12,7 +12,6 @@ import com.afollestad.async.Result;
 import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,11 +82,13 @@ public class ChannelFragment extends ChatFragment {
                                     reader.beginArray();
                                     while (reader.hasNext()) {
                                         reader.beginObject();
-                                        String text = "", timestamp = "";
 
+                                        String type = "", text = "", timestamp = "";
                                         while (reader.hasNext()) {
-                                            String name = reader.nextName();
-                                            switch (name) {
+                                            switch (reader.nextName()) {
+                                                case "type":
+                                                    type = reader.nextString();
+                                                    break;
                                                 case "text":
                                                     text = reader.nextString();
                                                     break;
@@ -100,16 +101,17 @@ public class ChannelFragment extends ChatFragment {
                                             }
                                         }
 
-                                        messages.add(new MessageItemData(getContext(), new ItemData.Identifier(text, timestamp), null));
+                                        if (type.equals("message")) {
+                                            messages.add(new MessageItemData(getContext(), new ItemData.Identifier(text, timestamp), null));
+                                        }
                                         reader.endObject();
                                     }
                                     reader.endArray();
                                 } else reader.skipValue();
                             }
                             reader.endObject();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            return null;
                         }
 
                         return messages;
