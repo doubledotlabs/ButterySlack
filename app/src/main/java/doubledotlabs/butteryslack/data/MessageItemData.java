@@ -67,6 +67,9 @@ public class MessageItemData extends ItemData<MessageItemData.ViewHolder> {
             if (getButterySlack().session.sessionPersona().getUserName().equals(sender.getUserName())) {
                 holder.v.setBackgroundColor(Color.WHITE);
                 ViewCompat.setElevation(holder.v, ViewUtils.getPixelsFromDp(2));
+            } else {
+                holder.v.setBackgroundColor(Color.TRANSPARENT);
+                ViewCompat.setElevation(holder.v, 0);
             }
 
             new Action<String>() {
