@@ -1,5 +1,8 @@
 package doubledotlabs.butteryslack.utils;
 
+import com.ullink.slack.simpleslackapi.SlackMessageHandle;
+import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
+
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
@@ -17,8 +20,16 @@ public class SlackUtils {
         Map<String, String> params = new HashMap<>();
         params.put("user", userId);
 
-        JSONObject object = butterySlack.session.postGenericSlackCommand(params, "users.profile.get").getReply().getPlainAnswer();
-        JSONObject profile = (JSONObject) object.get("profile");
-        return (String) profile.get("image_" + resolution);
+        SlackMessageHandle<GenericSlackReply> handle = butterySlack.session.postGenericSlackCommand(params, "users.profile.get");
+        if (handle != null) {
+            GenericSlackReply reply = handle.getReply();
+            if (reply != null) {
+                JSONObject object = reply.getPlainAnswer();
+                JSONObject profile = (JSONObject) object.get("profile");
+                return (String) profile.get("image_" + resolution);
+            }
+        }
+
+        return null;
     }
 }

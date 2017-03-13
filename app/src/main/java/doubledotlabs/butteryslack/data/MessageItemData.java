@@ -88,7 +88,7 @@ public class MessageItemData extends ItemData<MessageItemData.ViewHolder> {
                 @Override
                 protected void done(@Nullable String result) {
                     if (result != null) {
-                        Glide.with(getContext())
+                        Glide.with(getButterySlack())
                                 .load(result)
                                 .placeholder(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.colorAccent)))
                                 .into(holder.imageView);
