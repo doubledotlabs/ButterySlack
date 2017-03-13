@@ -3,6 +3,7 @@ package doubledotlabs.butteryslack.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackChannel;
@@ -106,6 +107,36 @@ public class ChannelFragment extends ChatFragment {
                 if (result != null) {
                     onPageLoaded(timestamp, result);
                 }
+            }
+        };
+    }
+
+    @Override
+    Action sendMessage(final String message) {
+        return new Action<String>() {
+            @NonNull
+            @Override
+            public String id() {
+                return "send";
+            }
+
+            @Nullable
+            @Override
+            protected String run() throws InterruptedException {
+                try {
+                    getButterySlack().session.sendMessage(channel, message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return e.getMessage();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void done(@Nullable String result) {
+                if (result != null)
+                    Toast.makeText(getContext(), result, Toast.LENGTH_SHORT).show();
             }
         };
     }

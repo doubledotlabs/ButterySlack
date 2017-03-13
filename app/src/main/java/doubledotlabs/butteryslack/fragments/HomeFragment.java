@@ -31,7 +31,7 @@ public class HomeFragment extends ButteryFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_chat, container, false);
+        View v = inflater.inflate(R.layout.fragment_home, container, false);
         setTitle(getString(R.string.app_name));
 
         channels = new ArrayList<>();

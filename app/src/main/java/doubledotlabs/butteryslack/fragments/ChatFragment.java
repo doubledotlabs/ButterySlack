@@ -3,19 +3,28 @@ package doubledotlabs.butteryslack.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.afollestad.async.Action;
 import com.afollestad.async.Async;
+import com.afollestad.async.Done;
 import com.afollestad.async.Pool;
+import com.afollestad.async.Result;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
@@ -35,13 +44,15 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     private List<ItemData> messages;
     private List<ItemData> oldMessages;
-    private Handler handler;
-
-    private RecyclerView recyclerView;
     private ItemAdapter adapter;
     private LoadingItemData loadingItem;
 
-    private Pool pool;
+    private RecyclerView recyclerView;
+    private EditText editText;
+    private View attachFile, send;
+
+    private Handler handler;
+    private Pool pagePool, sendingPool;
     private Map<String, Boolean> pages;
 
     @Nullable
@@ -51,6 +62,9 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         handler = new Handler(Looper.getMainLooper());
 
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
+        editText = (EditText) v.findViewById(R.id.editText);
+        attachFile = v.findViewById(R.id.attachFile);
+        send = v.findViewById(R.id.send);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setReverseLayout(true);
@@ -72,9 +86,9 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
                     pages.put(timestamp, false);
 
                     Action action = loadPage(timestamp);
-                    if (pool != null && pool.isExecuting())
-                        pool.push(action);
-                    else pool = Async.series(action);
+                    if (pagePool != null && pagePool.isExecuting())
+                        pagePool.push(action);
+                    else pagePool = Async.series(action);
                 } else Log.e("ChatFragment", "request for " + timestamp + " already sent.");
             }
         };
@@ -84,7 +98,64 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         adapter = new ItemAdapter(getContext(), messages);
         recyclerView.setAdapter(adapter);
 
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                int length = editText.getText().toString().replaceAll("\\s+", "").length();
+                if (length > 0 && send.getAlpha() == 0)
+                    send.animate().scaleX(1).scaleY(1).alpha(1).start();
+                else if (length <= 0 && send.getAlpha() == 1)
+                    send.animate().scaleX(0).scaleY(0).alpha(0).start();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    sendMessage();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
+
         return v;
+    }
+
+    final void sendMessage() {
+        String message = editText.getText().toString();
+        if (message.replaceAll("\\s+", "").length() > 0) {
+            Action action = sendMessage(message.trim());
+            if (pagePool != null && pagePool.isExecuting())
+                pagePool.push(action);
+            else pagePool = Async.series(action).done(new Done() {
+                @Override
+                public void result(@NonNull Result result) {
+                    recyclerView.scrollToPosition(0);
+                }
+            });
+
+            editText.setText(null);
+            send.animate().scaleX(0).scaleY(0).alpha(0).start();
+        }
     }
 
     final void registerListener() {
@@ -99,7 +170,9 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     abstract boolean isMessageInChannel(SlackMessagePosted event);
 
-    abstract Action<List<ItemData>> loadPage(String timestamp);
+    abstract Action loadPage(String timestamp);
+
+    abstract Action sendMessage(String message);
 
     @Override
     public boolean shouldShowBackButton() {
@@ -112,7 +185,6 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         this.messages.addAll(start, messages);
 
         DiffUtil.calculateDiff(new DiffCallback(oldMessages, new ArrayList<>(this.messages))).dispatchUpdatesTo(adapter);
-        Log.d("ChatFragment", "Items added - " + start + " to " + (start + messages.size()));
 
         pages.put(timestamp, true);
         if (timestamp.equals("0"))
