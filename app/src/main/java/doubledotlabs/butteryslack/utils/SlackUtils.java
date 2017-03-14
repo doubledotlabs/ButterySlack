@@ -26,7 +26,8 @@ public class SlackUtils {
             if (reply != null) {
                 JSONObject object = reply.getPlainAnswer();
                 JSONObject profile = (JSONObject) object.get("profile");
-                return (String) profile.get("image_" + resolution);
+                if (profile != null)
+                    return (String) profile.get("image_" + resolution);
             }
         }
 
