@@ -1,5 +1,6 @@
 package doubledotlabs.butteryslack.utils;
 
+import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackMessageHandle;
 import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
 
@@ -32,5 +33,12 @@ public class SlackUtils {
         }
 
         return null;
+    }
+
+    public static String getChannelTopic(SlackChannel channel) {
+        String topic = channel.getTopic();
+        if (topic == null || topic.length() < 1)
+            topic = channel.getPurpose();
+        return topic;
     }
 }

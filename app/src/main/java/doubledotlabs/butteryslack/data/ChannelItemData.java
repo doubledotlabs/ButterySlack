@@ -11,13 +11,14 @@ import com.ullink.slack.simpleslackapi.SlackChannel;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.fragments.ChannelFragment;
+import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public class ChannelItemData extends ItemData {
 
     private SlackChannel channel;
 
     public ChannelItemData(Context context, SlackChannel channel) {
-        super(context, new Identifier(channel.getName(), channel.getTopic()));
+        super(context, new Identifier(channel.getName(), SlackUtils.getChannelTopic(channel)));
         this.channel = channel;
     }
 
