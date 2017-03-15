@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
 import doubledotlabs.butteryslack.R;
+import doubledotlabs.butteryslack.utils.SlackMovementMethod;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public abstract class MessageItemData extends ItemData<ItemData.ViewHolder> {
@@ -53,8 +54,8 @@ public abstract class MessageItemData extends ItemData<ItemData.ViewHolder> {
         super.onBindViewHolder(holder, position);
         TextView subtitle = (TextView) holder.v.findViewById(R.id.subtitle);
         if (subtitle != null) {
-            if (!(subtitle.getMovementMethod() instanceof LinkMovementMethod))
-                subtitle.setMovementMethod(new LinkMovementMethod());
+            if (!(subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
+                subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
             new Action<String>() {
                 @NonNull

@@ -3,6 +3,7 @@ package doubledotlabs.butteryslack.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.afollestad.async.Action;
@@ -28,6 +29,7 @@ public class ChannelFragment extends ChatFragment {
 
     public static final String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
 
+    @Nullable
     private String channelId;
     private SlackChannel channel;
 
@@ -54,9 +56,11 @@ public class ChannelFragment extends ChatFragment {
             protected void done(@Nullable SlackChannel result) {
                 if (result != null) {
                     channel = result;
+                    channelId = result.getId();
                     setTitle(String.format(Locale.getDefault(), getString(R.string.title_channel), result.getName()));
                     registerListener();
-                }
+                } else
+                    Log.e("ChannelFragment", "Channel Id: " + (channelId != null ? channelId : "null"));
             }
         }.execute();
     }
@@ -87,65 +91,68 @@ public class ChannelFragment extends ChatFragment {
                 JSONObject json = getButterySlack().session.postGenericSlackCommand(params, "channels.history").getReply().getPlainAnswer();
                 JSONArray array = (JSONArray) json.get("messages");
 
-                for (Object object : array) {
-                    JSONObject message = (JSONObject) object;
-                    MessageItemData itemData = null;
+                if (array != null) {
+                    for (Object object : array) {
+                        JSONObject message = (JSONObject) object;
+                        MessageItemData itemData = null;
 
-                    String subtype = (String) message.get("subtype");
-                    String content = (String) message.get("text");
-                    String timestamp = (String) message.get("ts");
-                    if (subtype != null) {
-                        switch (subtype) {
-                            case "bot_message":
-                                itemData = new UserMessageItemData(
-                                        getContext(),
-                                        getButterySlack().session.findUserById((String) message.get("bot_id")),
-                                        content,
-                                        timestamp
-                                );
-                                break;
-                            case "channel_archive":
-                            case "channel_join":
-                            case "channel_leave":
-                            case "channel_name":
-                            case "channel_purpose":
-                            case "channel_topic":
-                            case "channel_unarchive":
-                            case "group_archive":
-                            case "group_join":
-                            case "group_leave":
-                            case "group_name":
-                            case "group_purpose":
-                            case "group_topic":
-                            case "group_unarchive":
-                            case "pinned_item":
-                            case "unpinned_item":
-                                itemData = new AnnouncementItemData(
-                                        getContext(),
-                                        content,
-                                        timestamp
-                                );
-                                break;
-                            case "me_message":
-                            case "file_comment":
-                            case "file_mention":
-                            case "file_share":
-                            case "message_changed":
-                            case "message_deleted":
-                            case "message_replied":
-                            case "reply_broadcast":
+                        String subtype = (String) message.get("subtype");
+                        String content = (String) message.get("text");
+                        String timestamp = (String) message.get("ts");
+
+                        if (subtype != null) {
+                            switch (subtype) {
+                                case "bot_message":
+                                    itemData = new UserMessageItemData(
+                                            getContext(),
+                                            getButterySlack().session.findUserById((String) message.get("bot_id")),
+                                            content,
+                                            timestamp
+                                    );
+                                    break;
+                                case "channel_archive":
+                                case "channel_join":
+                                case "channel_leave":
+                                case "channel_name":
+                                case "channel_purpose":
+                                case "channel_topic":
+                                case "channel_unarchive":
+                                case "group_archive":
+                                case "group_join":
+                                case "group_leave":
+                                case "group_name":
+                                case "group_purpose":
+                                case "group_topic":
+                                case "group_unarchive":
+                                case "pinned_item":
+                                case "unpinned_item":
+                                    itemData = new AnnouncementItemData(
+                                            getContext(),
+                                            content,
+                                            timestamp
+                                    );
+                                    break;
+                                case "me_message":
+                                case "file_comment":
+                                case "file_mention":
+                                case "file_share":
+                                case "message_changed":
+                                case "message_deleted":
+                                case "message_replied":
+                                case "reply_broadcast":
+                            }
                         }
-                    }
 
-                    if (itemData != null)
-                        messages.add(itemData);
-                    else {
-                        messages.add(new UserMessageItemData(
-                                getContext(),
-                                getButterySlack().session.findUserById((String) message.get("user")),
-                                content,
-                                timestamp
-                        ));
+                        if (itemData != null)
+                            messages.add(itemData);
+                        else {
+                            messages.add(new UserMessageItemData(
+                                    getContext(),
+                                    getButterySlack().session.findUserById((String) message.get("user")),
+                                    content,
+                                    timestamp
+                            ));
+                        }
                     }
                 }
 
