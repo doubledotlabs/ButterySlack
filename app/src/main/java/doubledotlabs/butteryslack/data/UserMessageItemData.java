@@ -68,6 +68,7 @@ public class UserMessageItemData extends MessageItemData {
                             Glide.with(getButterySlack())
                                     .load(result)
                                     .placeholder(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.colorAccent)))
+                                    .thumbnail(0.2f)
                                     .into(imageView);
                         }
                     }

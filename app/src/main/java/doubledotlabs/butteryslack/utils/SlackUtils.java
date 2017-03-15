@@ -66,7 +66,12 @@ public class SlackUtils {
                 if (channel != null) name = "#" + channel.getName();
             }
 
-            content = content.replace(content.substring(index, realEndIndex + 1), "<a href=\"" + id + "\">" + name + "</a>");
+            try {
+                content = content.replace(content.substring(index, realEndIndex + 1), "<a href=\"" + id + "\">" + name + "</a>");
+            } catch (StringIndexOutOfBoundsException e) {
+                e.printStackTrace();
+                break;
+            }
         }
 
         return content;
