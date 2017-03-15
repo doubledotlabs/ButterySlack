@@ -145,9 +145,9 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         String message = editText.getText().toString();
         if (message.replaceAll("\\s+", "").length() > 0) {
             Action action = sendMessage(message.trim());
-            if (pagePool != null && pagePool.isExecuting())
-                pagePool.push(action);
-            else pagePool = Async.series(action).done(new Done() {
+            if (sendingPool != null && sendingPool.isExecuting())
+                sendingPool.push(action);
+            else sendingPool = Async.series(action).done(new Done() {
                 @Override
                 public void result(@NonNull Result result) {
                     recyclerView.scrollToPosition(0);
