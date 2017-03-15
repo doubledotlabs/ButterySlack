@@ -9,17 +9,15 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
-import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.utils.SlackMovementMethod;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
-public abstract class MessageItemData extends ItemData<ItemData.ViewHolder> {
+public abstract class MessageItemData<T extends ItemData.ViewHolder> extends ItemData<T> {
 
     @Nullable
     private SlackUser sender;
@@ -47,15 +45,14 @@ public abstract class MessageItemData extends ItemData<ItemData.ViewHolder> {
     }
 
     @Override
-    public abstract ItemData.ViewHolder getViewHolder(LayoutInflater inflater, ViewGroup parent);
+    public abstract T getViewHolder(LayoutInflater inflater, ViewGroup parent);
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final T holder, int position) {
         super.onBindViewHolder(holder, position);
-        TextView subtitle = (TextView) holder.v.findViewById(R.id.subtitle);
-        if (subtitle != null) {
-            if (!(subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
-                subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
+        if (holder.subtitle != null) {
+            if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
+                holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
             new Action<String>() {
                 @NonNull
@@ -72,11 +69,10 @@ public abstract class MessageItemData extends ItemData<ItemData.ViewHolder> {
 
                 @Override
                 protected void done(@Nullable String result) {
-                    TextView subtitle = (TextView) holder.v.findViewById(R.id.subtitle);
-                    if (result != null && subtitle != null) {
+                    if (result != null && holder.subtitle != null) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                            subtitle.setText(Html.fromHtml(result, 0));
-                        else subtitle.setText(Html.fromHtml(result));
+                            holder.subtitle.setText(Html.fromHtml(result, 0));
+                        else holder.subtitle.setText(Html.fromHtml(result));
                     }
                 }
             }.execute();

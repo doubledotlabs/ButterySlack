@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -20,7 +21,7 @@ import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 import doubledotlabs.butteryslack.utils.ViewUtils;
 
-public class UserMessageItemData extends MessageItemData {
+public class UserMessageItemData extends MessageItemData<UserMessageItemData.ViewHolder> {
 
     public UserMessageItemData(Context context, @Nullable SlackUser sender, String content, String timestamp) {
         super(context, sender, content, timestamp);
@@ -63,18 +64,26 @@ public class UserMessageItemData extends MessageItemData {
                 @Override
                 protected void done(@Nullable String result) {
                     if (result != null) {
-                        ImageView imageView = (ImageView) holder.v.findViewById(R.id.image);
-                        if (imageView != null) {
+                        if (holder.imageView != null) {
                             Glide.with(getButterySlack())
                                     .load(result)
                                     .placeholder(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.colorAccent)))
                                     .thumbnail(0.2f)
-                                    .into(imageView);
+                                    .into(holder.imageView);
                         }
                     }
                 }
             }.execute();
+        }
+    }
 
+    public class ViewHolder extends ItemData.ViewHolder {
+
+        ImageView imageView;
+
+        public ViewHolder(View v) {
+            super(v);
+            imageView = (ImageView) v.findViewById(R.id.image);
         }
     }
 }
