@@ -45,28 +45,28 @@ public class SlackUtils {
 
     public static String getHtmlFromMessage(ButterySlack butterySlack, String content) {
         while (true) {
-            int index = content.indexOf("<@");
-            if (index < 0)
-                index = content.indexOf("<#");
-            if (index < 0) break;
-
-            int endIndex = content.indexOf("|");
-            int realEndIndex = content.indexOf(">");
-            if (endIndex < 1)
-                endIndex = realEndIndex;
-
-            String id = content.substring(index + 1, endIndex);
-            String name = id;
-
-            if (id.startsWith("@")) {
-                SlackUser user = butterySlack.session.findUserById(id.substring(1, id.length()));
-                if (user != null) name = "@" + user.getUserName();
-            } else if (id.startsWith("#")) {
-                SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
-                if (channel != null) name = "#" + channel.getName();
-            }
-
             try {
+                int index = content.indexOf("<@");
+                if (index < 0)
+                    index = content.indexOf("<#");
+                if (index < 0) break;
+
+                int endIndex = content.indexOf("|");
+                int realEndIndex = content.indexOf(">");
+                if (endIndex < 1)
+                    endIndex = realEndIndex;
+
+                String id = content.substring(index + 1, endIndex);
+                String name = id;
+
+                if (id.startsWith("@")) {
+                    SlackUser user = butterySlack.session.findUserById(id.substring(1, id.length()));
+                    if (user != null) name = "@" + user.getUserName();
+                } else if (id.startsWith("#")) {
+                    SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
+                    if (channel != null) name = "#" + channel.getName();
+                }
+
                 content = content.replace(content.substring(index, realEndIndex + 1), "<a href=\"" + id + "\">" + name + "</a>");
             } catch (StringIndexOutOfBoundsException e) {
                 e.printStackTrace();
