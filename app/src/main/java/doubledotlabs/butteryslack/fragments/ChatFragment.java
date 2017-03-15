@@ -75,7 +75,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         pages = new ArrayMap<>();
         loadingItem = new LoadingItemData(getContext()) {
             @Override
-            public void onBindViewHolder(ViewHolder holder, int position) {
+            public void onBindViewHolder(LoadingItemData.ViewHolder holder, int position) {
                 String timestamp = "0";
                 if (messages.size() > 1) {
                     ItemData message = messages.get(messages.indexOf(loadingItem) - 1);
@@ -102,7 +102,6 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -116,7 +115,6 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
