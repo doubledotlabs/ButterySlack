@@ -23,8 +23,15 @@ import doubledotlabs.butteryslack.utils.ViewUtils;
 
 public class UserMessageItemData extends MessageItemData<UserMessageItemData.ViewHolder> {
 
+    private boolean isReply;
+
     public UserMessageItemData(Context context, @Nullable SlackUser sender, String content, String timestamp) {
         super(context, sender, content, timestamp);
+    }
+
+    public UserMessageItemData(Context context, @Nullable SlackUser sender, String content, String timestamp, boolean isReply) {
+        super(context, sender, content, timestamp);
+        this.isReply = isReply;
     }
 
     public UserMessageItemData(Context context, SlackMessagePosted event) {
@@ -39,14 +46,23 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
+
         if (getSender() != null) {
-            if (getButterySlack().session.sessionPersona().getUserName().equals(getSender().getUserName())) {
+            if (getSender() != null && getButterySlack().session.sessionPersona().getUserName().equals(getSender().getUserName())) {
                 holder.v.setBackgroundColor(Color.WHITE);
                 ViewCompat.setElevation(holder.v, ViewUtils.getPixelsFromDp(2));
             } else {
                 holder.v.setBackgroundColor(Color.TRANSPARENT);
                 ViewCompat.setElevation(holder.v, 0);
             }
+        }
+
+        if (isReply) {
+            holder.title.setVisibility(View.GONE);
+            holder.imageView.setVisibility(View.GONE);
+        } else if (getSender() != null) {
+            holder.title.setVisibility(View.VISIBLE);
+            holder.imageView.setVisibility(View.VISIBLE);
 
             new Action<String>() {
                 @NonNull
@@ -74,6 +90,9 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
                     }
                 }
             }.execute();
+        } else {
+            holder.title.setVisibility(View.GONE);
+            holder.imageView.setVisibility(View.GONE);
         }
     }
 

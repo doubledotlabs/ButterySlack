@@ -92,13 +92,21 @@ public class ChannelFragment extends ChatFragment {
                 JSONArray array = (JSONArray) json.get("messages");
 
                 if (array != null) {
-                    for (Object object : array) {
-                        JSONObject message = (JSONObject) object;
+                    for (int i = 0; i < array.size(); i++) {
+                        JSONObject message = (JSONObject) array.get(i);
                         MessageItemData itemData = null;
 
                         String subtype = (String) message.get("subtype");
+                        String senderId = (String) message.get("user");
                         String content = (String) message.get("text");
                         String timestamp = (String) message.get("ts");
+
+                        boolean isReply = false;
+                        if (senderId != null && i < array.size() - 1) {
+                            String previousId = (String) ((JSONObject) array.get(i + 1)).get("user");
+                            if (previousId != null)
+                                isReply = previousId.equals(senderId);
+                        }
 
                         if (subtype != null) {
                             switch (subtype) {
@@ -148,9 +156,10 @@ public class ChannelFragment extends ChatFragment {
                         else {
                             messages.add(new UserMessageItemData(
                                     getContext(),
-                                    getButterySlack().session.findUserById((String) message.get("user")),
+                                    getButterySlack().session.findUserById(senderId),
                                     content,
-                                    timestamp
+                                    timestamp,
+                                    isReply
                             ));
                         }
                     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="56dp"
+    android:gravity="start"
     android:orientation="horizontal">
 
     <doubledotlabs.butteryslack.views.CircleImageView
@@ -24,9 +24,9 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="12dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="66dp"
         android:layout_marginRight="16dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="66dp"
         android:layout_marginTop="12dp"
         android:background="?android:selectableItemBackground"
         android:orientation="vertical">
@@ -47,4 +47,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>
