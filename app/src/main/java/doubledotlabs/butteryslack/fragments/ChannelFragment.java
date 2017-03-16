@@ -20,10 +20,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.data.AnnouncementItemData;
 import doubledotlabs.butteryslack.data.ItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
-import doubledotlabs.butteryslack.data.UserMessageItemData;
 
 public class ChannelFragment extends ChatFragment {
 
@@ -93,75 +91,8 @@ public class ChannelFragment extends ChatFragment {
 
                 if (array != null) {
                     for (int i = 0; i < array.size(); i++) {
-                        JSONObject message = (JSONObject) array.get(i);
-                        MessageItemData itemData = null;
-
-                        String subtype = (String) message.get("subtype");
-                        String senderId = (String) message.get("user");
-                        String content = (String) message.get("text");
-                        String timestamp = (String) message.get("ts");
-
-                        boolean isReply = false;
-                        if (senderId != null && i < array.size() - 1) {
-                            String previousId = (String) ((JSONObject) array.get(i + 1)).get("user");
-                            if (previousId != null)
-                                isReply = previousId.equals(senderId);
-                        }
-
-                        if (subtype != null) {
-                            switch (subtype) {
-                                case "bot_message":
-                                    itemData = new UserMessageItemData(
-                                            getContext(),
-                                            getButterySlack().session.findUserById((String) message.get("bot_id")),
-                                            content,
-                                            timestamp
-                                    );
-                                    break;
-                                case "channel_archive":
-                                case "channel_join":
-                                case "channel_leave":
-                                case "channel_name":
-                                case "channel_purpose":
-                                case "channel_topic":
-                                case "channel_unarchive":
-                                case "group_archive":
-                                case "group_join":
-                                case "group_leave":
-                                case "group_name":
-                                case "group_purpose":
-                                case "group_topic":
-                                case "group_unarchive":
-                                case "pinned_item":
-                                case "unpinned_item":
-                                    itemData = new AnnouncementItemData(
-                                            getContext(),
-                                            content,
-                                            timestamp
-                                    );
-                                    break;
-                                case "me_message":
-                                case "file_comment":
-                                case "file_mention":
-                                case "file_share":
-                                case "message_changed":
-                                case "message_deleted":
-                                case "message_replied":
-                                case "reply_broadcast":
-                            }
-                        }
-
-                        if (itemData != null)
-                            messages.add(itemData);
-                        else {
-                            messages.add(new UserMessageItemData(
-                                    getContext(),
-                                    getButterySlack().session.findUserById(senderId),
-                                    content,
-                                    timestamp,
-                                    isReply
-                            ));
-                        }
+                        MessageItemData message = MessageItemData.from(getContext(), (JSONObject) array.get(i));
+                        if (message != null) messages.add(message);
                     }
                 }
 

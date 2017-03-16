@@ -38,7 +38,6 @@ import doubledotlabs.butteryslack.adapters.ItemAdapter;
 import doubledotlabs.butteryslack.data.ItemData;
 import doubledotlabs.butteryslack.data.LoadingItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
-import doubledotlabs.butteryslack.data.UserMessageItemData;
 
 
 public abstract class ChatFragment extends ButteryFragment implements SlackMessagePostedListener {
@@ -196,7 +195,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    messages.add(0, new UserMessageItemData(getContext(), event));
+                    messages.add(0, MessageItemData.from(getContext(), event));
                     adapter.notifyItemInserted(0);
                 }
             });
