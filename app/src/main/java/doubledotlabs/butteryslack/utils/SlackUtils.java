@@ -22,18 +22,15 @@ public class SlackUtils {
         Map<String, String> params = new HashMap<>();
         params.put("user", userId);
 
-        SlackMessageHandle<GenericSlackReply> handle = butterySlack.session.postGenericSlackCommand(params, "users.profile.get");
-        if (handle != null) {
+        try {
+            SlackMessageHandle<GenericSlackReply> handle = butterySlack.session.postGenericSlackCommand(params, "users.profile.get");
             GenericSlackReply reply = handle.getReply();
-            if (reply != null) {
-                JSONObject object = reply.getPlainAnswer();
-                JSONObject profile = (JSONObject) object.get("profile");
-                if (profile != null)
-                    return (String) profile.get("image_" + resolution);
-            }
+            JSONObject object = reply.getPlainAnswer();
+            JSONObject profile = (JSONObject) object.get("profile");
+            return (String) profile.get("image_" + resolution);
+        } catch (NullPointerException e) {
+            return null;
         }
-
-        return null;
     }
 
     public static String getChannelTopic(SlackChannel channel) {
@@ -67,7 +64,7 @@ public class SlackUtils {
                     if (channel != null) name = "#" + channel.getName();
                 }
 
-                content = content.replace(content.substring(index, realEndIndex + 1), "<a href=\"" + id + "\">" + name + "</a>");
+                content = content.replace(content.substring(index, realEndIndex + 1), getHtmlLink(id, name));
             } catch (StringIndexOutOfBoundsException e) {
                 e.printStackTrace();
                 break;
@@ -75,5 +72,9 @@ public class SlackUtils {
         }
 
         return content;
+    }
+
+    public static String getHtmlLink(String href, String name) {
+        return "<a href=\"" + href + "\">" + name + "</a>";
     }
 }
