@@ -1,6 +1,7 @@
 package doubledotlabs.butteryslack.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
@@ -12,6 +13,7 @@ import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.ButterySlack;
@@ -47,14 +49,24 @@ public class SlackUtils {
     }
 
     public static String getEmojiMessage(ButterySlack butterySlack, String content) {
-        if (butterySlack.getEmojis() != null) {
+        if (content.contains(":") && butterySlack.getEmojis() != null) {
             for (EmojiData emoji : butterySlack.getEmojis()) {
-                if (emoji.getUnicodeSize() > 0)
-                    content = content.replaceAll(emoji.getSlackName(), emoji.getUnicode());
+                if (emoji.getUnicodeSize() > 0 && content.contains(emoji.getSlackName()))
+                    content = content.replace(emoji.getSlackName(), emoji.getUnicode());
             }
         }
 
         return content;
+    }
+
+    public static String getMarkdownMessage(ButterySlack butterySlack, String content) {
+        content = replaceInside(content, "_", "<i>%1$s</i>");
+        content = replaceInside(content, "*", "<b>%1$s</b>");
+
+        if (content.startsWith("&gt;"))
+            content = "<blockquote>&nbsp;" + content.replace("&gt;", "") + "</blockquote>";
+
+        return getEmojiMessage(butterySlack, content);
     }
 
     public static String getHtmlMessage(ButterySlack butterySlack, String content) {
@@ -78,11 +90,20 @@ public class SlackUtils {
                 String name = id;
 
                 if (id.startsWith("@")) {
-                    SlackUser user = butterySlack.session.findUserById(id.substring(1, id.length()));
-                    if (user != null) name = "@" + user.getUserName();
+                    if (endIndex != realEndIndex) {
+                        name = "@" + content.substring(endIndex + 1, realEndIndex);
+                        Log.d("HtmlMessage", name);
+                    } else {
+                        SlackUser user = butterySlack.session.findUserById(id.substring(1, id.length()));
+                        if (user != null) name = "@" + user.getUserName();
+                    }
                 } else if (id.startsWith("#")) {
-                    SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
-                    if (channel != null) name = "#" + channel.getName();
+                    if (endIndex != realEndIndex) {
+                        name = "#" + content.substring(endIndex + 1, realEndIndex);
+                    } else {
+                        SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
+                        if (channel != null) name = "#" + channel.getName();
+                    }
                 } else if (id.startsWith("http") && endIndex != realEndIndex) {
                     name = content.substring(endIndex + 1, realEndIndex);
                 }
@@ -94,7 +115,22 @@ public class SlackUtils {
             }
         }
 
-        return getEmojiMessage(butterySlack, content);
+        return getMarkdownMessage(butterySlack, content);
+    }
+
+    public static String replaceInside(String content, String character, String format) {
+        try {
+            int index;
+            while ((index = content.indexOf(character)) >= 0) {
+                int endIndex = content.indexOf(character, index + 1);
+                String inside = String.format(Locale.getDefault(), format, content.substring(index + 1, endIndex));
+                content = content.replace(content.substring(index, endIndex + 1), inside);
+            }
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+
+        return content;
     }
 
     public static String getHtmlLink(String href, String name) {

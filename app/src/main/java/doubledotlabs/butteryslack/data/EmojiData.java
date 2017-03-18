@@ -35,7 +35,7 @@ public class EmojiData {
             }
         }
 
-        return getName().replace("_", " ");
+        return getSlackName();
     }
 
     public String getUnicode(int i) {
@@ -43,7 +43,7 @@ public class EmojiData {
             return String.valueOf(Character.toChars(Integer.parseInt(unicodes[i], 16)));
         } catch (Exception e) {
             e.printStackTrace();
-            return getName().replace("_", " ");
+            return getSlackName();
         }
     }
 
@@ -56,12 +56,8 @@ public class EmojiData {
         emoji.name = (String) object.get("short_name");
         emoji.file = (String) object.get("image");
         emoji.unicode = (String) object.get("unified");
-        if (emoji.unicode != null) {
+        if (emoji.unicode != null)
             emoji.unicodes = emoji.unicode.split("-");
-            for (int i = 0; i < emoji.unicodes.length; i++) {
-                emoji.unicodes[i] = emoji.unicodes[i].replace("-", "");
-            }
-        }
 
         return emoji;
     }
