@@ -29,55 +29,14 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
     @Nullable
     private String authorName, authorLink, authorIcon;
     @Nullable
-    private String pretext, text;
+    private String pretext, text, textType;
     @Nullable
     private String imageUrl, thumbUrl;
     @Nullable
     private String footer, footerIcon;
 
-    public AttachmentData(Context context, SlackAttachment attachment) {
-        super(context, new Identifier(attachment.getTitle(), attachment.getPretext()));
-        title = attachment.getTitle();
-        titleLink = attachment.getTitleLink();
-        authorName = attachment.getAuthorName();
-        authorLink = attachment.getAuthorLink();
-        authorIcon = attachment.getAuthorIcon();
-        pretext = attachment.getPretext();
-        text = attachment.getText();
-        imageUrl = attachment.getImageUrl();
-        thumbUrl = attachment.getThumbUrl();
-        footer = attachment.getFooter();
-        footerIcon = attachment.getFooterIcon();
-    }
-
-    public AttachmentData(Context context, JSONObject object) {
-        super(context, new Identifier((String) object.get("title"), (String) object.get("pretext")));
-        title = (String) object.get("title");
-        titleLink = (String) object.get("title_link");
-        authorName = (String) object.get("author_name");
-        authorLink = (String) object.get("author_link");
-        authorIcon = (String) object.get("author_icon");
-        pretext = (String) object.get("pretext");
-        text = (String) object.get("text");
-        imageUrl = (String) object.get("image_url");
-        thumbUrl = (String) object.get("thumb_url");
-        footer = (String) object.get("footer");
-        footerIcon = (String) object.get("footer_icon");
-    }
-
-    public AttachmentData(Context context, String title, String titleLink, String authorName, String authorLink, String authorIcon, String pretext, String text, String imageUrl, String thumbUrl, String footer, String footerIcon) {
-        super(context, new Identifier(title, pretext));
-        this.title = title;
-        this.titleLink = titleLink;
-        this.authorName = authorName;
-        this.authorLink = authorLink;
-        this.authorIcon = authorIcon;
-        this.pretext = pretext;
-        this.text = text;
-        this.imageUrl = imageUrl;
-        this.thumbUrl = thumbUrl;
-        this.footer = footer;
-        this.footerIcon = footerIcon;
+    private AttachmentData(Context context, Identifier identifier) {
+        super(context, identifier);
     }
 
     @Override
@@ -87,26 +46,42 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        super.onBindViewHolder(holder, position);
+        holder.v.setOnClickListener(this);
 
         if (!(holder.title.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
             holder.title.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
-        if (titleLink != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                holder.title.setText(Html.fromHtml(SlackUtils.getHtmlLink(titleLink, title), 0));
-            else holder.title.setText(Html.fromHtml(SlackUtils.getHtmlLink(titleLink, title)));
-        }
+        if (title != null) {
+            holder.title.setVisibility(View.VISIBLE);
+
+            if (titleLink != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    holder.title.setText(Html.fromHtml(SlackUtils.getHtmlLink(titleLink, title), 0));
+                else holder.title.setText(Html.fromHtml(SlackUtils.getHtmlLink(titleLink, title)));
+            } else holder.title.setText(title);
+        } else holder.title.setVisibility(View.GONE);
 
         if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
             holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
-        if (pretext != null) {
+        if (text != null) {
+            holder.subtitle.setVisibility(View.VISIBLE);
+
+            if (textType != null) {
+                //TODO: syntax highlighting
+                holder.subtitle.setText(text);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text), 0));
+            else
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text)));
+        } else if (pretext != null) {
+            holder.subtitle.setVisibility(View.VISIBLE);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                 holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext), 0));
             else
                 holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext)));
-        }
+        } else holder.subtitle.setVisibility(View.GONE);
 
         if (authorIcon != null) {
             holder.authorIconContainer.setVisibility(View.VISIBLE);
@@ -151,12 +126,6 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
                 holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer), 0));
             else
                 holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer)));
-        } else if (text != null) {
-            holder.footerName.setVisibility(View.VISIBLE);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text), 0));
-            else
-                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text)));
         } else holder.footerName.setVisibility(View.GONE);
     }
 
@@ -187,5 +156,73 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
             authorName = (TextView) v.findViewById(R.id.authorName);
             footerName = (TextView) v.findViewById(R.id.footerName);
         }
+    }
+
+    public static AttachmentData from(Context context, SlackAttachment attachment) {
+        AttachmentData data = new AttachmentData(context, new Identifier(attachment.getTitle(), attachment.getPretext()));
+
+        data.title = attachment.getTitle();
+        data.titleLink = attachment.getTitleLink();
+        data.authorName = attachment.getAuthorName();
+        data.authorLink = attachment.getAuthorLink();
+        data.authorIcon = attachment.getAuthorIcon();
+        data.pretext = attachment.getPretext();
+        data.text = attachment.getText();
+        data.imageUrl = attachment.getImageUrl();
+        data.thumbUrl = attachment.getThumbUrl();
+        data.footer = attachment.getFooter();
+        data.footerIcon = attachment.getFooterIcon();
+
+        return data;
+    }
+
+    public static AttachmentData from(Context context, JSONObject object) {
+        AttachmentData data = new AttachmentData(context, new Identifier((String) object.get("title"), (String) object.get("pretext")));
+
+        data.title = (String) object.get("title");
+        data.titleLink = (String) object.get("title_link");
+        data.authorName = (String) object.get("author_name");
+        data.authorLink = (String) object.get("author_link");
+        data.authorIcon = (String) object.get("author_icon");
+        data.pretext = (String) object.get("pretext");
+        data.text = (String) object.get("text");
+        data.imageUrl = (String) object.get("image_url");
+        data.thumbUrl = (String) object.get("thumb_url");
+        data.footer = (String) object.get("footer");
+        data.footerIcon = (String) object.get("footer_icon");
+
+        return data;
+    }
+
+    public static AttachmentData fromFile(Context context, JSONObject object) {
+        JSONObject comment = (JSONObject) object.get("initial_comment");
+
+        String title = (String) object.get("title");
+        String pretext = comment != null ? (String) comment.get("comment") : null;
+
+        AttachmentData data = new AttachmentData(context, new Identifier(title, pretext));
+        data.title = title;
+        data.titleLink = (String) object.get("permalink");
+        data.pretext = pretext;
+
+        String type = (String) object.get("filetype");
+        if (type != null) {
+            switch (type) {
+                case "png":
+                    data.pretext = null;
+                    data.imageUrl = (String) object.get("url_private");
+                    data.footer = pretext;
+                    break;
+                case "text":
+                    data.text = (String) object.get("preview");
+                    break;
+                default:
+                    data.text = (String) object.get("preview");
+                    data.textType = type;
+                    break;
+            }
+        }
+
+        return data;
     }
 }

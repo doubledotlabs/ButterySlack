@@ -105,7 +105,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         JSONArray array = (JSONArray) object.get("attachments");
         if (array != null) {
             for (Object attachment : array) {
-                attachments.add(new AttachmentData(context, (JSONObject) attachment));
+                attachments.add(AttachmentData.from(context, (JSONObject) attachment));
             }
         }
 
@@ -146,30 +146,8 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                     content = null;
 
                     JSONObject file = (JSONObject) object.get("file");
-                    if (file != null) {
-                        String type = (String) file.get("filetype");
-                        if (type != null) {
-                            switch (type) {
-                                case "png":
-                                    JSONObject comment = (JSONObject) object.get("initial_comment");
-                                    attachments.add(new AttachmentData(
-                                            context,
-                                            (String) file.get("title"),
-                                            (String) file.get("permalink"),
-                                            null,
-                                            null,
-                                            null,
-                                            comment != null ? (String) comment.get("comment") : null,
-                                            null,
-                                            (String) file.get("url_private"),
-                                            null,
-                                            null,
-                                            null
-                                    ));
-                                    break;
-                            }
-                        }
-                    }
+                    if (file != null)
+                        attachments.add(AttachmentData.fromFile(context, file));
                     break;
                 case "me_message":
                 case "file_comment":
@@ -202,7 +180,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         List<ItemData> attachments = new ArrayList<>();
         if (event.getAttachments() != null) {
             for (SlackAttachment attachment : event.getAttachments()) {
-                attachments.add(new AttachmentData(context, attachment));
+                attachments.add(AttachmentData.from(context, attachment));
             }
         }
 
