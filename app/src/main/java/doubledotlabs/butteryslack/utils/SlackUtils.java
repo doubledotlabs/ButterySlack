@@ -51,6 +51,10 @@ public class SlackUtils {
                 int index = content.indexOf("<@");
                 if (index < 0)
                     index = content.indexOf("<#");
+                if (index < 0)
+                    index = content.indexOf("<http://");
+                if (index < 0)
+                    index = content.indexOf("<https://");
                 if (index < 0) break;
 
                 int endIndex = content.indexOf("|");
@@ -67,6 +71,8 @@ public class SlackUtils {
                 } else if (id.startsWith("#")) {
                     SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
                     if (channel != null) name = "#" + channel.getName();
+                } else if (id.startsWith("http") && endIndex != realEndIndex) {
+                    name = content.substring(endIndex + 1, realEndIndex);
                 }
 
                 content = content.replace(content.substring(index, realEndIndex + 1), getHtmlLink(id, name));

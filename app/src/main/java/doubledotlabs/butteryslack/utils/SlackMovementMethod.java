@@ -1,5 +1,7 @@
 package doubledotlabs.butteryslack.utils;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -61,7 +63,7 @@ public class SlackMovementMethod extends LinkMovementMethod {
             if (Patterns.PHONE.matcher(linkText).matches()) {
                 //TODO: phone links
             } else if (Patterns.WEB_URL.matcher(linkText).matches()) {
-                //TODO: web links
+                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkText)));
             } else if (Patterns.EMAIL_ADDRESS.matcher(linkText).matches()) {
                 //TODO: email links
             } else if (linkText.startsWith("@")) {

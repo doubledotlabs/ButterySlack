@@ -1,6 +1,8 @@
 package doubledotlabs.butteryslack.data;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -96,6 +98,16 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
             else holder.title.setText(Html.fromHtml(SlackUtils.getHtmlLink(titleLink, title)));
         }
 
+        if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
+            holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
+
+        if (pretext != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext), 0));
+            else
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext)));
+        }
+
         if (authorIcon != null) {
             holder.authorIconContainer.setVisibility(View.VISIBLE);
             Glide.with(getContext()).load(authorIcon).thumbnail(0.2f).into(holder.authorIcon);
@@ -130,14 +142,30 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
             Glide.with(getContext()).load(footerIcon).into(holder.footerIcon);
         } else holder.footerIconContainer.setVisibility(View.GONE);
 
+        if (!(holder.title.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
+            holder.title.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
+
         if (footer != null) {
             holder.footerName.setVisibility(View.VISIBLE);
-            holder.footerName.setText(footer);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer), 0));
+            else
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer)));
+        } else if (text != null) {
+            holder.footerName.setVisibility(View.VISIBLE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text), 0));
+            else
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text)));
         } else holder.footerName.setVisibility(View.GONE);
     }
 
     @Override
     public void onClick(View v) {
+        if (titleLink != null)
+            getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(titleLink)));
+        else if (authorLink != null)
+            getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(authorLink)));
     }
 
     public static class ViewHolder extends ItemData.ViewHolder {
