@@ -116,7 +116,8 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                             context,
                             butterySlack.session.findUserById((String) object.get("bot_id")),
                             content,
-                            timestamp
+                            timestamp,
+                            attachments
                     );
                     break;
                 case "channel_archive":
