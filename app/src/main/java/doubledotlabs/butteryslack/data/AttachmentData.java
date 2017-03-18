@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.ullink.slack.simpleslackapi.SlackAttachment;
+import com.ullink.slack.simpleslackapi.SlackFile;
 
 import org.json.simple.JSONObject;
 
@@ -218,6 +219,33 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
                     break;
                 default:
                     data.text = (String) object.get("preview");
+                    data.textType = type;
+                    break;
+            }
+        }
+
+        return data;
+    }
+
+    public static AttachmentData fromFile(Context context, SlackFile file) {
+        AttachmentData data = new AttachmentData(context, new Identifier(file.getTitle(), file.getComment()));
+        data.title = file.getTitle();
+        data.titleLink = file.getPermalink();
+        data.pretext = file.getName();
+
+        String type = file.getFiletype();
+        if (type != null) {
+            switch (type) {
+                case "png":
+                    data.pretext = null;
+                    data.imageUrl = file.getUrlPrivate();
+                    data.footer = file.getName();
+                    break;
+                case "text":
+                    data.text = file.getName();
+                    break;
+                default:
+                    data.text = file.getName();
                     data.textType = type;
                     break;
             }

@@ -54,6 +54,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
     private Handler handler;
     private Pool pagePool, sendingPool;
     private Map<String, Boolean> pages;
+    private boolean isRegistered;
 
     @Nullable
     @Override
@@ -157,12 +158,19 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
     }
 
     final void registerListener() {
-        getButterySlack().session.addMessagePostedListener(this);
+        if (!isRegistered) {
+            getButterySlack().session.addMessagePostedListener(this);
+            isRegistered = true;
+        }
     }
 
     @Override
     public void onDestroy() {
-        getButterySlack().session.removeMessagePostedListener(this);
+        if (isRegistered) {
+            getButterySlack().session.removeMessagePostedListener(this);
+            isRegistered = false;
+        }
+
         super.onDestroy();
     }
 

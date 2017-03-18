@@ -114,7 +114,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 case "bot_message":
                     itemData = new UserMessageItemData(
                             context,
-                            butterySlack.session.findUserById((String) object.get("bot_id")),
+                            butterySlack.session.findUserById(senderId != null ? senderId : (String) object.get("bot_id")),
                             content,
                             timestamp,
                             attachments
@@ -177,6 +177,10 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         SlackMessagePosted.MessageSubType subType = event.getMessageSubType();
         String type = subType != null ? subType.name() : null;
 
+        SlackUser sender = event.getSender();
+        String content = event.getMessageContent();
+        String timestamp = event.getTimestamp();
+
         List<ItemData> attachments = new ArrayList<>();
         if (event.getAttachments() != null) {
             for (SlackAttachment attachment : event.getAttachments()) {
@@ -186,6 +190,15 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
 
         if (type != null) {
             switch (type) {
+                case "bot_message":
+                    itemData = new UserMessageItemData(
+                            context,
+                            sender,
+                            content,
+                            timestamp,
+                            attachments
+                    );
+                    break;
                 case "channel_archive":
                 case "channel_join":
                 case "channel_leave":
@@ -208,7 +221,10 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                     );
                     break;
                 case "file_share":
-                    //TODO: do some magic
+                    content = null;
+
+                    if (event.getSlackFile() != null)
+                        attachments.add(AttachmentData.fromFile(context, event.getSlackFile()));
                     break;
                 case "me_message":
                 case "file_comment":
@@ -217,12 +233,19 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 case "message_deleted":
                 case "message_replied":
                 case "reply_broadcast":
-                case "bot_message":
             }
         }
 
         if (itemData != null)
             return itemData;
-        else return new UserMessageItemData(context, event, attachments);
+        else {
+            return new UserMessageItemData(
+                    context,
+                    sender,
+                    content,
+                    timestamp,
+                    attachments
+            );
+        }
     }
 }
