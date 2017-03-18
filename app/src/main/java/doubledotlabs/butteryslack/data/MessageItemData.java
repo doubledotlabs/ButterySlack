@@ -72,7 +72,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 @Nullable
                 @Override
                 protected String run() throws InterruptedException {
-                    return SlackUtils.getHtmlFromMessage(getButterySlack(), getIdentifier().getSubtitle());
+                    return SlackUtils.getHtmlMessage(getButterySlack(), getIdentifier().getSubtitle());
                 }
 
                 @Override

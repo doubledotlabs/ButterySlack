@@ -71,16 +71,16 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
                 //TODO: syntax highlighting
                 holder.subtitle.setText(text);
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text), 0));
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), text), 0));
             else
-                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), text)));
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), text)));
         } else if (pretext != null) {
             holder.subtitle.setVisibility(View.VISIBLE);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext), 0));
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), pretext), 0));
             else
-                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), pretext)));
+                holder.subtitle.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), pretext)));
         } else holder.subtitle.setVisibility(View.GONE);
 
         if (authorIcon != null) {
@@ -123,9 +123,9 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
         if (footer != null) {
             holder.footerName.setVisibility(View.VISIBLE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer), 0));
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), footer), 0));
             else
-                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlFromMessage(getButterySlack(), footer)));
+                holder.footerName.setText(Html.fromHtml(SlackUtils.getHtmlMessage(getButterySlack(), footer)));
         } else holder.footerName.setVisibility(View.GONE);
     }
 

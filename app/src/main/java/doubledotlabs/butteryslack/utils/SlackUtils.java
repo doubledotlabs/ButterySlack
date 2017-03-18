@@ -16,6 +16,7 @@ import java.util.Map;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
+import doubledotlabs.butteryslack.data.EmojiData;
 
 public class SlackUtils {
 
@@ -45,7 +46,18 @@ public class SlackUtils {
         return topic;
     }
 
-    public static String getHtmlFromMessage(ButterySlack butterySlack, String content) {
+    public static String getEmojiMessage(ButterySlack butterySlack, String content) {
+        if (butterySlack.getEmojis() != null) {
+            for (EmojiData emoji : butterySlack.getEmojis()) {
+                if (emoji.getUnicodeSize() > 0)
+                    content = content.replaceAll(emoji.getSlackName(), emoji.getUnicode());
+            }
+        }
+
+        return content;
+    }
+
+    public static String getHtmlMessage(ButterySlack butterySlack, String content) {
         while (true) {
             try {
                 int index = content.indexOf("<@");
@@ -82,7 +94,7 @@ public class SlackUtils {
             }
         }
 
-        return content;
+        return getEmojiMessage(butterySlack, content);
     }
 
     public static String getHtmlLink(String href, String name) {
