@@ -11,10 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.afollestad.async.Action;
+import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.utils.SlackMovementMethod;
@@ -96,6 +101,14 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         String content = (String) object.get("text");
         String timestamp = (String) object.get("ts");
 
+        List<ItemData> attachments = new ArrayList<>();
+        JSONArray array = (JSONArray) object.get("attachments");
+        if (array != null) {
+            for (Object attachment : array) {
+                attachments.add(new AttachmentData(context, (JSONObject) attachment));
+            }
+        }
+
         if (subtype != null) {
             switch (subtype) {
                 case "bot_message":
@@ -128,10 +141,38 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                             timestamp
                     );
                     break;
+                case "file_share":
+                    content = null;
+
+                    JSONObject file = (JSONObject) object.get("file");
+                    if (file != null) {
+                        String type = (String) file.get("filetype");
+                        if (type != null) {
+                            switch (type) {
+                                case "png":
+                                    JSONObject comment = (JSONObject) object.get("initial_comment");
+                                    attachments.add(new AttachmentData(
+                                            context,
+                                            (String) file.get("title"),
+                                            (String) file.get("permalink"),
+                                            null,
+                                            null,
+                                            null,
+                                            comment != null ? (String) comment.get("comment") : null,
+                                            null,
+                                            (String) file.get("url_private"),
+                                            null,
+                                            null,
+                                            null
+                                    ));
+                                    break;
+                            }
+                        }
+                    }
+                    break;
                 case "me_message":
                 case "file_comment":
                 case "file_mention":
-                case "file_share":
                 case "message_changed":
                 case "message_deleted":
                 case "message_replied":
@@ -146,7 +187,8 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                     context,
                     butterySlack.session.findUserById(senderId),
                     content,
-                    timestamp
+                    timestamp,
+                    attachments
             );
         }
     }
@@ -155,6 +197,13 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         MessageItemData itemData = null;
         SlackMessagePosted.MessageSubType subType = event.getMessageSubType();
         String type = subType != null ? subType.name() : null;
+
+        List<ItemData> attachments = new ArrayList<>();
+        if (event.getAttachments() != null) {
+            for (SlackAttachment attachment : event.getAttachments()) {
+                attachments.add(new AttachmentData(context, attachment));
+            }
+        }
 
         if (type != null) {
             switch (type) {
@@ -179,10 +228,12 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                             event
                     );
                     break;
+                case "file_share":
+                    //TODO: do some magic
+                    break;
                 case "me_message":
                 case "file_comment":
                 case "file_mention":
-                case "file_share":
                 case "message_changed":
                 case "message_deleted":
                 case "message_replied":
@@ -193,6 +244,6 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
 
         if (itemData != null)
             return itemData;
-        else return new UserMessageItemData(context, event);
+        else return new UserMessageItemData(context, event, attachments);
     }
 }

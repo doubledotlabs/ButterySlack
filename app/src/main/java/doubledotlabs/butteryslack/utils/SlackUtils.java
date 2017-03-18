@@ -1,5 +1,9 @@
 package doubledotlabs.butteryslack.utils;
 
+import android.content.Context;
+
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
 import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackMessageHandle;
 import com.ullink.slack.simpleslackapi.SlackUser;
@@ -11,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.ButterySlack;
+import doubledotlabs.butteryslack.R;
 
 public class SlackUtils {
 
@@ -76,5 +81,9 @@ public class SlackUtils {
 
     public static String getHtmlLink(String href, String name) {
         return "<a href=\"" + href + "\">" + name + "</a>";
+    }
+
+    public static GlideUrl getUrl(Context context, String url) {
+        return new GlideUrl(url, new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + context.getString(R.string.token)).build());
     }
 }

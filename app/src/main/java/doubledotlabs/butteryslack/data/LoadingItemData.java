@@ -23,7 +23,7 @@ public abstract class LoadingItemData extends ItemData<LoadingItemData.ViewHolde
     public void onClick(View v) {
     }
 
-    public class ViewHolder extends ItemData.ViewHolder {
+    public static class ViewHolder extends ItemData.ViewHolder {
 
         ProgressBar progressBar;
 

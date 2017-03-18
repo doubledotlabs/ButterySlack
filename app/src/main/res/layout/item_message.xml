@@ -19,7 +19,7 @@
 
     <LinearLayout
         android:id="@+id/message"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="12dp"
@@ -28,7 +28,6 @@
         android:layout_marginRight="16dp"
         android:layout_marginStart="66dp"
         android:layout_marginTop="12dp"
-        android:background="?android:selectableItemBackground"
         android:orientation="vertical">
 
         <TextView
@@ -44,6 +43,12 @@
             android:layout_height="wrap_content"
             android:textColor="?android:textColorSecondary"
             android:textSize="14sp" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start" />
 
     </LinearLayout>
 

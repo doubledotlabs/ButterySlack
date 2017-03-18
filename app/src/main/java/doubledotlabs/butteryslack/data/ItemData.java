@@ -38,8 +38,13 @@ public abstract class ItemData<T extends ItemData.ViewHolder> implements View.On
 
     public void onBindViewHolder(T holder, int position) {
         if (identifier != null) {
-            if (holder.title != null)
-                holder.title.setText(identifier.getTitle());
+            if (holder.title != null) {
+                String text = identifier.getTitle();
+                if (text.length() > 0) {
+                    holder.title.setVisibility(View.VISIBLE);
+                    holder.title.setText(text);
+                } else holder.title.setVisibility(View.GONE);
+            }
             if (holder.subtitle != null) {
                 String text = identifier.getSubtitle();
                 if (text.length() > 0) {

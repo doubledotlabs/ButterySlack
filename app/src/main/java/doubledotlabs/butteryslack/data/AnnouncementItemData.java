@@ -24,7 +24,7 @@ public class AnnouncementItemData extends MessageItemData<AnnouncementItemData.V
         return new ViewHolder(inflater.inflate(R.layout.item_announcement, parent, false));
     }
 
-    public class ViewHolder extends ItemData.ViewHolder {
+    public static class ViewHolder extends ItemData.ViewHolder {
 
         public ViewHolder(View v) {
             super(v);
