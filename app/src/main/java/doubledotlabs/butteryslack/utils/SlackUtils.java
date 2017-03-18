@@ -1,7 +1,6 @@
 package doubledotlabs.butteryslack.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
@@ -90,17 +89,16 @@ public class SlackUtils {
                 String name = id;
 
                 if (id.startsWith("@")) {
-                    if (endIndex != realEndIndex) {
+                    if (endIndex != realEndIndex)
                         name = "@" + content.substring(endIndex + 1, realEndIndex);
-                        Log.d("HtmlMessage", name);
-                    } else {
+                    else {
                         SlackUser user = butterySlack.session.findUserById(id.substring(1, id.length()));
                         if (user != null) name = "@" + user.getUserName();
                     }
                 } else if (id.startsWith("#")) {
-                    if (endIndex != realEndIndex) {
+                    if (endIndex != realEndIndex)
                         name = "#" + content.substring(endIndex + 1, realEndIndex);
-                    } else {
+                    else {
                         SlackChannel channel = butterySlack.session.findChannelById(id.substring(1, id.length()));
                         if (channel != null) name = "#" + channel.getName();
                     }
