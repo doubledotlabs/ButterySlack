@@ -65,7 +65,7 @@ public class SlackUtils {
         if (content.startsWith("&gt;"))
             content = "<blockquote>&nbsp;" + content.replace("&gt;", "") + "</blockquote>";
 
-        return getEmojiMessage(butterySlack, content);
+        return content;
     }
 
     public static String getHtmlMessage(ButterySlack butterySlack, String content) {
@@ -113,10 +113,12 @@ public class SlackUtils {
             }
         }
 
-        return getMarkdownMessage(butterySlack, content);
+        content = getEmojiMessage(butterySlack, content);
+        content = getMarkdownMessage(butterySlack, content);
+        return content;
     }
 
-    public static String replaceInside(String content, String character, String format) {
+    private static String replaceInside(String content, String character, String format) {
         try {
             int index;
             while ((index = content.indexOf(character)) >= 0) {
