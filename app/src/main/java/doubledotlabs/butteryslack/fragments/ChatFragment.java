@@ -55,6 +55,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
     private Pool pagePool, sendingPool;
     private Map<String, Boolean> pages;
     private boolean isRegistered;
+    private String timestamp;
 
     @Nullable
     @Override
@@ -199,7 +200,8 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     @Override
     public void onEvent(final SlackMessagePosted event, SlackSession session) {
-        if (isMessageInChannel(event)) {
+        if (isMessageInChannel(event) && !event.getTimestamp().equals(timestamp)) {
+            timestamp = event.getTimestamp();
             handler.post(new Runnable() {
                 @Override
                 public void run() {
