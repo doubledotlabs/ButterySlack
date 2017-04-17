@@ -111,7 +111,10 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
             manager.setStackFromEnd(true);
             holder.recyclerView.setLayoutManager(manager);
             holder.recyclerView.setAdapter(new ItemAdapter(getContext(), attachments));
-        } else holder.recyclerView.setVisibility(View.GONE);
+        } else {
+            holder.recyclerView.setAdapter(null);
+            holder.recyclerView.setVisibility(View.GONE);
+        }
     }
 
     public static class ViewHolder extends ItemData.ViewHolder {

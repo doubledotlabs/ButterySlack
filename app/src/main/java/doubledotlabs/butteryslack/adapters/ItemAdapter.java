@@ -32,19 +32,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemData.ViewHolder> {
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
-
-        holder.itemView.setAlpha(0);
-        holder.itemView.animate().alpha(1).setDuration(500).start();
     }
 
     @Override
     public int getItemViewType(int position) {
-        ItemData data = items.get(position);
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getClass().equals(data.getClass())) return i;
-        }
-
-        return -1;
+        return position;
     }
 
     @Override
