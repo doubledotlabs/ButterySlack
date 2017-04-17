@@ -69,6 +69,9 @@ public class SlackUtils {
     }
 
     public static String getHtmlMessage(ButterySlack butterySlack, String content) {
+        if (butterySlack == null || content == null)
+            return null;
+
         while (true) {
             try {
                 int index = content.indexOf("<@");

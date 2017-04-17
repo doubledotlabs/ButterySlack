@@ -17,16 +17,15 @@ import java.util.Collection;
 import java.util.List;
 
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.adapters.ItemAdapter;
+import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.data.ChannelItemData;
-import doubledotlabs.butteryslack.data.ItemData;
 
 public class HomeFragment extends ButteryFragment {
 
-    private List<ItemData> channels;
+    private List<BaseItemAdapter.BaseItem<ChannelItemData.ViewHolder>> channels;
 
     private RecyclerView recyclerView;
-    private ItemAdapter adapter;
+    private BaseItemAdapter<ChannelItemData.ViewHolder> adapter;
 
     @Nullable
     @Override
@@ -41,7 +40,7 @@ public class HomeFragment extends ButteryFragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new ItemAdapter(getContext(), channels);
+        adapter = new BaseItemAdapter<>(getContext(), channels);
         recyclerView.setAdapter(adapter);
 
         new Action<Collection<SlackChannel>>() {
@@ -62,7 +61,7 @@ public class HomeFragment extends ButteryFragment {
                 if (result != null) {
                     for (SlackChannel channel : result) {
                         if (channel.getName() != null)
-                            channels.add(new ChannelItemData(getContext(), channel));
+                            channels.add(new ChannelItemData(channel));
                     }
                     adapter.notifyDataSetChanged();
                 }

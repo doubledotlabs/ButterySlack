@@ -1,6 +1,5 @@
 package doubledotlabs.butteryslack.data;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +10,12 @@ import doubledotlabs.butteryslack.R;
 
 public class AnnouncementItemData extends MessageItemData<AnnouncementItemData.ViewHolder> {
 
-    public AnnouncementItemData(Context context, String content, String timestamp) {
-        super(context, null, content, timestamp);
+    public AnnouncementItemData(String content, String timestamp) {
+        super(null, content, timestamp);
     }
 
-    public AnnouncementItemData(Context context, SlackMessagePosted event) {
-        super(context, event);
+    public AnnouncementItemData(SlackMessagePosted event) {
+        super(event);
     }
 
     @Override
@@ -24,7 +23,7 @@ public class AnnouncementItemData extends MessageItemData<AnnouncementItemData.V
         return new ViewHolder(inflater.inflate(R.layout.item_announcement, parent, false));
     }
 
-    public static class ViewHolder extends ItemData.ViewHolder {
+    public static class ViewHolder extends MessageItemData.ViewHolder {
 
         public ViewHolder(View v) {
             super(v);

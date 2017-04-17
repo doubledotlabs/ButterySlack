@@ -5,10 +5,12 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackAttachment;
@@ -22,24 +24,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import doubledotlabs.butteryslack.ButterySlack;
+import doubledotlabs.butteryslack.R;
+import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.utils.SlackMovementMethod;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
-public abstract class MessageItemData<T extends ItemData.ViewHolder> extends ItemData<T> {
+public abstract class MessageItemData<T extends MessageItemData.ViewHolder> extends BaseItemAdapter.BaseItem<T> {
 
     @Nullable
     private SlackUser sender;
+    private String content;
     private String timestamp;
 
-    public MessageItemData(Context context, @Nullable SlackUser sender, String content, String timestamp) {
-        super(context, new Identifier(sender != null ? sender.getUserName() : null, content));
+    public MessageItemData(@Nullable SlackUser sender, String content, String timestamp) {
         this.sender = sender;
+        this.content = content;
         this.timestamp = timestamp;
     }
 
-    public MessageItemData(Context context, SlackMessagePosted event) {
-        super(context, new Identifier(event.getSender() != null ? event.getSender().getUserName() : null, event.getMessageContent()));
+    public MessageItemData(SlackMessagePosted event) {
         sender = event.getSender();
+        content = event.getMessageContent();
         timestamp = event.getTimestamp();
     }
 
@@ -57,7 +62,12 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
 
     @Override
     public void onBindViewHolder(final T holder, int position) {
-        super.onBindViewHolder(holder, position);
+        if (holder.title != null) {
+            if (sender != null)
+                holder.title.setText(sender.getUserName());
+            else holder.title.setVisibility(View.GONE);
+        }
+
         if (holder.subtitle != null) {
             if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
                 holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
@@ -72,7 +82,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 @Nullable
                 @Override
                 protected String run() throws InterruptedException {
-                    return SlackUtils.getHtmlMessage(getButterySlack(), getIdentifier().getSubtitle());
+                    return SlackUtils.getHtmlMessage(getButterySlack(), content);
                 }
 
                 @Override
@@ -84,12 +94,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                     }
                 }
             }.execute();
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-
+        } else holder.subtitle.setVisibility(View.GONE);
     }
 
     public static MessageItemData from(Context context, JSONObject object) {
@@ -101,11 +106,11 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         String content = (String) object.get("text");
         String timestamp = (String) object.get("ts");
 
-        List<ItemData> attachments = new ArrayList<>();
+        List<AttachmentData> attachments = new ArrayList<>();
         JSONArray array = (JSONArray) object.get("attachments");
         if (array != null) {
             for (Object attachment : array) {
-                attachments.add(AttachmentData.from(context, (JSONObject) attachment));
+                attachments.add(new AttachmentData((JSONObject) attachment));
             }
         }
 
@@ -113,7 +118,6 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
             switch (subtype) {
                 case "bot_message":
                     itemData = new UserMessageItemData(
-                            context,
                             butterySlack.session.findUserById(senderId != null ? senderId : (String) object.get("bot_id")),
                             content,
                             timestamp,
@@ -137,7 +141,6 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 case "pinned_item":
                 case "unpinned_item":
                     itemData = new AnnouncementItemData(
-                            context,
                             content,
                             timestamp
                     );
@@ -147,7 +150,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
 
                     JSONObject file = (JSONObject) object.get("file");
                     if (file != null)
-                        attachments.add(AttachmentData.fromFile(context, file));
+                        attachments.add(new AttachmentData(file));
                     break;
                 case "me_message":
                 case "file_comment":
@@ -163,7 +166,6 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
             return itemData;
         else {
             return new UserMessageItemData(
-                    context,
                     butterySlack.session.findUserById(senderId),
                     content,
                     timestamp,
@@ -172,7 +174,7 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         }
     }
 
-    public static MessageItemData from(Context context, SlackMessagePosted event) {
+    public static MessageItemData from(SlackMessagePosted event) {
         MessageItemData itemData = null;
         SlackMessagePosted.MessageSubType subType = event.getMessageSubType();
         String type = subType != null ? subType.name() : null;
@@ -181,10 +183,10 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
         String content = event.getMessageContent();
         String timestamp = event.getTimestamp();
 
-        List<ItemData> attachments = new ArrayList<>();
+        List<AttachmentData> attachments = new ArrayList<>();
         if (event.getAttachments() != null) {
             for (SlackAttachment attachment : event.getAttachments()) {
-                attachments.add(AttachmentData.from(context, attachment));
+                attachments.add(new AttachmentData(attachment));
             }
         }
 
@@ -192,7 +194,6 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
             switch (type) {
                 case "bot_message":
                     itemData = new UserMessageItemData(
-                            context,
                             sender,
                             content,
                             timestamp,
@@ -215,16 +216,13 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
                 case "group_unarchive":
                 case "pinned_item":
                 case "unpinned_item":
-                    itemData = new AnnouncementItemData(
-                            context,
-                            event
-                    );
+                    itemData = new AnnouncementItemData(event);
                     break;
                 case "file_share":
                     content = null;
 
                     if (event.getSlackFile() != null)
-                        attachments.add(AttachmentData.fromFile(context, event.getSlackFile()));
+                        attachments.add(new AttachmentData(event.getSlackFile()));
                     break;
                 case "me_message":
                 case "file_comment":
@@ -240,12 +238,22 @@ public abstract class MessageItemData<T extends ItemData.ViewHolder> extends Ite
             return itemData;
         else {
             return new UserMessageItemData(
-                    context,
                     sender,
                     content,
                     timestamp,
                     attachments
             );
+        }
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        TextView title, subtitle;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.title);
+            subtitle = (TextView) itemView.findViewById(R.id.subtitle);
         }
     }
 }

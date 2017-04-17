@@ -1,10 +1,10 @@
 package doubledotlabs.butteryslack.data;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +19,12 @@ import com.ullink.slack.simpleslackapi.SlackFile;
 import org.json.simple.JSONObject;
 
 import doubledotlabs.butteryslack.R;
+import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.utils.CustomTabsBuilder;
 import doubledotlabs.butteryslack.utils.SlackMovementMethod;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
-public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
+public class AttachmentData extends BaseItemAdapter.BaseItem<AttachmentData.ViewHolder> implements View.OnClickListener {
 
     @Nullable
     private String title, titleLink;
@@ -36,8 +37,85 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
     @Nullable
     private String footer, footerIcon;
 
-    private AttachmentData(Context context, Identifier identifier) {
-        super(context, identifier);
+    public AttachmentData(SlackAttachment attachment) {
+        title = attachment.getTitle();
+        titleLink = attachment.getTitleLink();
+        authorName = attachment.getAuthorName();
+        authorLink = attachment.getAuthorLink();
+        authorIcon = attachment.getAuthorIcon();
+        pretext = attachment.getPretext();
+        text = attachment.getText();
+        imageUrl = attachment.getImageUrl();
+        thumbUrl = attachment.getThumbUrl();
+        footer = attachment.getFooter();
+        footerIcon = attachment.getFooterIcon();
+    }
+
+    public AttachmentData(JSONObject object) {
+        if (object.get("initial_comment") != null) {
+            JSONObject comment = (JSONObject) object.get("initial_comment");
+
+            String title = (String) object.get("title");
+            String pretext = comment != null ? (String) comment.get("comment") : null;
+
+            this.title = title;
+            titleLink = (String) object.get("permalink");
+            this.pretext = pretext;
+
+            String type = (String) object.get("filetype");
+            if (type != null) {
+                switch (type) {
+                    case "png":
+                        pretext = null;
+                        imageUrl = (String) object.get("url_private");
+                        footer = pretext;
+                        break;
+                    case "text":
+                        text = (String) object.get("preview");
+                        break;
+                    default:
+                        text = (String) object.get("preview");
+                        textType = type;
+                        break;
+                }
+            }
+        } else {
+            title = (String) object.get("title");
+            titleLink = (String) object.get("title_link");
+            authorName = (String) object.get("author_name");
+            authorLink = (String) object.get("author_link");
+            authorIcon = (String) object.get("author_icon");
+            pretext = (String) object.get("pretext");
+            text = (String) object.get("text");
+            imageUrl = (String) object.get("image_url");
+            thumbUrl = (String) object.get("thumb_url");
+            footer = (String) object.get("footer");
+            footerIcon = (String) object.get("footer_icon");
+        }
+    }
+
+    public AttachmentData(SlackFile file) {
+        title = file.getTitle();
+        titleLink = file.getPermalink();
+        pretext = file.getName();
+
+        String type = file.getFiletype();
+        if (type != null) {
+            switch (type) {
+                case "png":
+                    pretext = null;
+                    imageUrl = file.getUrlPrivate();
+                    footer = file.getName();
+                    break;
+                case "text":
+                    text = file.getName();
+                    break;
+                default:
+                    text = file.getName();
+                    textType = type;
+                    break;
+            }
+        }
     }
 
     @Override
@@ -47,7 +125,7 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.v.setOnClickListener(this);
+        holder.itemView.setOnClickListener(this);
 
         if (!(holder.title.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
             holder.title.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
@@ -138,119 +216,27 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
             CustomTabsBuilder.open(getContext(), Uri.parse(authorLink));
     }
 
-    public static class ViewHolder extends ItemData.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
+        TextView title, subtitle;
         View authorIconContainer, thumbIconContainer, imageContainer, footerIconContainer;
         ImageView authorIcon, thumbIcon, image, footerIcon;
         TextView authorName, footerName;
 
-        public ViewHolder(View v) {
-            super(v);
-            authorIconContainer = v.findViewById(R.id.authorIconContainer);
-            thumbIconContainer = v.findViewById(R.id.thumbIconContainer);
-            imageContainer = v.findViewById(R.id.imageContainer);
-            footerIconContainer = v.findViewById(R.id.footerIconContainer);
-            authorIcon = (ImageView) v.findViewById(R.id.authorIcon);
-            thumbIcon = (ImageView) v.findViewById(R.id.thumbIcon);
-            image = (ImageView) v.findViewById(R.id.image);
-            footerIcon = (ImageView) v.findViewById(R.id.footerIcon);
-            authorName = (TextView) v.findViewById(R.id.authorName);
-            footerName = (TextView) v.findViewById(R.id.footerName);
+        public ViewHolder(View itemView) {
+            super(itemView);
+            title = (TextView) itemView.findViewById(R.id.title);
+            subtitle = (TextView) itemView.findViewById(R.id.subtitle);
+            authorIconContainer = itemView.findViewById(R.id.authorIconContainer);
+            thumbIconContainer = itemView.findViewById(R.id.thumbIconContainer);
+            imageContainer = itemView.findViewById(R.id.imageContainer);
+            footerIconContainer = itemView.findViewById(R.id.footerIconContainer);
+            authorIcon = (ImageView) itemView.findViewById(R.id.authorIcon);
+            thumbIcon = (ImageView) itemView.findViewById(R.id.thumbIcon);
+            image = (ImageView) itemView.findViewById(R.id.image);
+            footerIcon = (ImageView) itemView.findViewById(R.id.footerIcon);
+            authorName = (TextView) itemView.findViewById(R.id.authorName);
+            footerName = (TextView) itemView.findViewById(R.id.footerName);
         }
-    }
-
-    public static AttachmentData from(Context context, SlackAttachment attachment) {
-        AttachmentData data = new AttachmentData(context, new Identifier(attachment.getTitle(), attachment.getPretext()));
-
-        data.title = attachment.getTitle();
-        data.titleLink = attachment.getTitleLink();
-        data.authorName = attachment.getAuthorName();
-        data.authorLink = attachment.getAuthorLink();
-        data.authorIcon = attachment.getAuthorIcon();
-        data.pretext = attachment.getPretext();
-        data.text = attachment.getText();
-        data.imageUrl = attachment.getImageUrl();
-        data.thumbUrl = attachment.getThumbUrl();
-        data.footer = attachment.getFooter();
-        data.footerIcon = attachment.getFooterIcon();
-
-        return data;
-    }
-
-    public static AttachmentData from(Context context, JSONObject object) {
-        AttachmentData data = new AttachmentData(context, new Identifier((String) object.get("title"), (String) object.get("pretext")));
-
-        data.title = (String) object.get("title");
-        data.titleLink = (String) object.get("title_link");
-        data.authorName = (String) object.get("author_name");
-        data.authorLink = (String) object.get("author_link");
-        data.authorIcon = (String) object.get("author_icon");
-        data.pretext = (String) object.get("pretext");
-        data.text = (String) object.get("text");
-        data.imageUrl = (String) object.get("image_url");
-        data.thumbUrl = (String) object.get("thumb_url");
-        data.footer = (String) object.get("footer");
-        data.footerIcon = (String) object.get("footer_icon");
-
-        return data;
-    }
-
-    public static AttachmentData fromFile(Context context, JSONObject object) {
-        JSONObject comment = (JSONObject) object.get("initial_comment");
-
-        String title = (String) object.get("title");
-        String pretext = comment != null ? (String) comment.get("comment") : null;
-
-        AttachmentData data = new AttachmentData(context, new Identifier(title, pretext));
-        data.title = title;
-        data.titleLink = (String) object.get("permalink");
-        data.pretext = pretext;
-
-        String type = (String) object.get("filetype");
-        if (type != null) {
-            switch (type) {
-                case "png":
-                    data.pretext = null;
-                    data.imageUrl = (String) object.get("url_private");
-                    data.footer = pretext;
-                    break;
-                case "text":
-                    data.text = (String) object.get("preview");
-                    break;
-                default:
-                    data.text = (String) object.get("preview");
-                    data.textType = type;
-                    break;
-            }
-        }
-
-        return data;
-    }
-
-    public static AttachmentData fromFile(Context context, SlackFile file) {
-        AttachmentData data = new AttachmentData(context, new Identifier(file.getTitle(), file.getComment()));
-        data.title = file.getTitle();
-        data.titleLink = file.getPermalink();
-        data.pretext = file.getName();
-
-        String type = file.getFiletype();
-        if (type != null) {
-            switch (type) {
-                case "png":
-                    data.pretext = null;
-                    data.imageUrl = file.getUrlPrivate();
-                    data.footer = file.getName();
-                    break;
-                case "text":
-                    data.text = file.getName();
-                    break;
-                default:
-                    data.text = file.getName();
-                    data.textType = type;
-                    break;
-            }
-        }
-
-        return data;
     }
 }

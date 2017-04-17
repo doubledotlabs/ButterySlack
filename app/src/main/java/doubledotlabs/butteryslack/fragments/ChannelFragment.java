@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.data.ItemData;
+import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
 public class ChannelFragment extends ChatFragment {
@@ -69,8 +69,8 @@ public class ChannelFragment extends ChatFragment {
     }
 
     @Override
-    Action<List<ItemData>> loadPage(final String timestamp) {
-        return new Action<List<ItemData>>() {
+    Action<List<BaseItemAdapter.BaseItem>> loadPage(final String timestamp) {
+        return new Action<List<BaseItemAdapter.BaseItem>>() {
             @NonNull
             @Override
             public String id() {
@@ -79,12 +79,12 @@ public class ChannelFragment extends ChatFragment {
 
             @Nullable
             @Override
-            protected List<ItemData> run() throws InterruptedException {
+            protected List<BaseItemAdapter.BaseItem> run() throws InterruptedException {
                 Map<String, String> params = new HashMap<>();
                 params.put("channel", channelId);
                 params.put("latest", timestamp);
 
-                List<ItemData> messages = new ArrayList<>();
+                List<BaseItemAdapter.BaseItem> messages = new ArrayList<>();
 
                 JSONObject json = getButterySlack().session.postGenericSlackCommand(params, "channels.history").getReply().getPlainAnswer();
                 JSONArray array = (JSONArray) json.get("messages");
@@ -100,7 +100,7 @@ public class ChannelFragment extends ChatFragment {
             }
 
             @Override
-            protected void done(@Nullable List<ItemData> result) {
+            protected void done(@Nullable List<BaseItemAdapter.BaseItem> result) {
                 if (result != null) {
                     onPageLoaded(timestamp, result);
                 }

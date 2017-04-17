@@ -34,17 +34,16 @@ import java.util.List;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.adapters.ItemAdapter;
-import doubledotlabs.butteryslack.data.ItemData;
+import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.data.LoadingItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
 
 public abstract class ChatFragment extends ButteryFragment implements SlackMessagePostedListener {
 
-    private List<ItemData> messages;
-    private List<ItemData> oldMessages;
-    private ItemAdapter adapter;
+    private List<BaseItemAdapter.BaseItem> messages;
+    private List<BaseItemAdapter.BaseItem> oldMessages;
+    private BaseItemAdapter adapter;
     private LoadingItemData loadingItem;
 
     private RecyclerView recyclerView;
@@ -74,12 +73,12 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
         messages = new ArrayList<>();
         pages = new ArrayMap<>();
-        loadingItem = new LoadingItemData(getContext()) {
+        loadingItem = new LoadingItemData() {
             @Override
             public void onBindViewHolder(LoadingItemData.ViewHolder holder, int position) {
                 String timestamp = "0";
                 if (messages.size() > 1) {
-                    ItemData message = messages.get(messages.indexOf(loadingItem) - 1);
+                    BaseItemAdapter.BaseItem message = messages.get(messages.indexOf(loadingItem) - 1);
                     if (message instanceof MessageItemData)
                         timestamp = ((MessageItemData) message).getTimestamp();
                 }
@@ -97,7 +96,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
         messages.add(loadingItem);
 
-        adapter = new ItemAdapter(getContext(), messages);
+        adapter = new BaseItemAdapter(getContext(), messages);
         recyclerView.setAdapter(adapter);
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -186,12 +185,13 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
         return true;
     }
 
-    final void onPageLoaded(String timestamp, final List<ItemData> messages) {
+    final void onPageLoaded(String timestamp, final List<BaseItemAdapter.BaseItem> messages) {
         int start = this.messages.indexOf(loadingItem);
         oldMessages = new ArrayList<>(this.messages);
         this.messages.addAll(start, messages);
 
         DiffUtil.calculateDiff(new DiffCallback(oldMessages, new ArrayList<>(this.messages))).dispatchUpdatesTo(adapter);
+        adapter.notifyItemChanged(start - 1);
 
         pages.put(timestamp, true);
         if (timestamp.equals("0"))
@@ -205,7 +205,7 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    messages.add(0, MessageItemData.from(getContext(), event));
+                    messages.add(0, MessageItemData.from(event));
                     adapter.notifyItemInserted(0);
                 }
             });
@@ -214,10 +214,10 @@ public abstract class ChatFragment extends ButteryFragment implements SlackMessa
 
     private static class DiffCallback extends DiffUtil.Callback {
 
-        private List<ItemData> oldMessages;
-        private List<ItemData> messages;
+        private List<BaseItemAdapter.BaseItem> oldMessages;
+        private List<BaseItemAdapter.BaseItem> messages;
 
-        DiffCallback(List<ItemData> oldMessages, List<ItemData> messages) {
+        DiffCallback(List<BaseItemAdapter.BaseItem> oldMessages, List<BaseItemAdapter.BaseItem> messages) {
             this.oldMessages = oldMessages;
             this.messages = messages;
         }
