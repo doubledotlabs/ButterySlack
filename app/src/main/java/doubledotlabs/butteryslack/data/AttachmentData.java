@@ -1,7 +1,6 @@
 package doubledotlabs.butteryslack.data;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -20,6 +19,7 @@ import com.ullink.slack.simpleslackapi.SlackFile;
 import org.json.simple.JSONObject;
 
 import doubledotlabs.butteryslack.R;
+import doubledotlabs.butteryslack.utils.CustomTabsBuilder;
 import doubledotlabs.butteryslack.utils.SlackMovementMethod;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
@@ -133,9 +133,9 @@ public class AttachmentData extends ItemData<AttachmentData.ViewHolder> {
     @Override
     public void onClick(View v) {
         if (titleLink != null)
-            getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(titleLink)));
+            CustomTabsBuilder.open(getContext(), Uri.parse(titleLink));
         else if (authorLink != null)
-            getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(authorLink)));
+            CustomTabsBuilder.open(getContext(), Uri.parse(authorLink));
     }
 
     public static class ViewHolder extends ItemData.ViewHolder {
