@@ -27,8 +27,8 @@
         android:layout_marginLeft="66dp"
         android:layout_marginRight="16dp"
         android:layout_marginStart="66dp"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="12dp">
 
         <TextView
             android:id="@+id/title"

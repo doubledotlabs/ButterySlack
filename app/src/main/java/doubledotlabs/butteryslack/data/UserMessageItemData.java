@@ -23,6 +23,7 @@ import java.util.List;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
+import doubledotlabs.butteryslack.utils.ConversionUtils;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 import doubledotlabs.butteryslack.utils.ViewUtils;
 
@@ -84,9 +85,11 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
         if (isReply()) {
             holder.title.setVisibility(View.GONE);
             holder.imageView.setVisibility(View.GONE);
+            holder.message.setPadding(0, 0, 0, 0);
         } else if (getSender() != null) {
             holder.title.setVisibility(View.VISIBLE);
             holder.imageView.setVisibility(View.VISIBLE);
+            holder.message.setPadding(0, ConversionUtils.getPixelsFromDp(12), 0, 0);
 
             new Action<String>() {
                 @NonNull
@@ -134,11 +137,13 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
 
         ImageView imageView;
         RecyclerView recyclerView;
+        View message;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.image);
             recyclerView = (RecyclerView) itemView.findViewById(R.id.recyclerView);
+            message = itemView.findViewById(R.id.message);
         }
     }
 }
