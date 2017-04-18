@@ -110,7 +110,7 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
         JSONArray array = (JSONArray) object.get("attachments");
         if (array != null) {
             for (Object attachment : array) {
-                attachments.add(new AttachmentData((JSONObject) attachment));
+                attachments.add(new AttachmentData(AttachmentData.TYPE_ATTACHMENT, (JSONObject) attachment));
             }
         }
 
@@ -150,7 +150,7 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
 
                     JSONObject file = (JSONObject) object.get("file");
                     if (file != null)
-                        attachments.add(new AttachmentData(file));
+                        attachments.add(new AttachmentData(AttachmentData.TYPE_FILE, file));
                     break;
                 case "me_message":
                 case "file_comment":

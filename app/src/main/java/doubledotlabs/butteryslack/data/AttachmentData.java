@@ -26,6 +26,9 @@ import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public class AttachmentData extends BaseItemAdapter.BaseItem<AttachmentData.ViewHolder> implements View.OnClickListener {
 
+    public static final String TYPE_ATTACHMENT = "attachment";
+    public static final String TYPE_FILE = "file";
+
     @Nullable
     private String title, titleLink;
     @Nullable
@@ -51,46 +54,49 @@ public class AttachmentData extends BaseItemAdapter.BaseItem<AttachmentData.View
         footerIcon = attachment.getFooterIcon();
     }
 
-    public AttachmentData(JSONObject object) {
-        if (object.get("initial_comment") != null) {
-            JSONObject comment = (JSONObject) object.get("initial_comment");
+    public AttachmentData(String type, JSONObject object) {
+        switch (type) {
+            case TYPE_ATTACHMENT:
+                title = (String) object.get("title");
+                titleLink = (String) object.get("title_link");
+                authorName = (String) object.get("author_name");
+                authorLink = (String) object.get("author_link");
+                authorIcon = (String) object.get("author_icon");
+                pretext = (String) object.get("pretext");
+                text = (String) object.get("text");
+                imageUrl = (String) object.get("image_url");
+                thumbUrl = (String) object.get("thumb_url");
+                footer = (String) object.get("footer");
+                footerIcon = (String) object.get("footer_icon");
+                break;
+            case TYPE_FILE:
+                JSONObject comment = (JSONObject) object.get("initial_comment");
 
-            String title = (String) object.get("title");
-            String pretext = comment != null ? (String) comment.get("comment") : null;
+                String title = (String) object.get("title");
+                String pretext = comment != null ? (String) comment.get("comment") : null;
 
-            this.title = title;
-            titleLink = (String) object.get("permalink");
-            this.pretext = pretext;
+                this.title = title;
+                titleLink = (String) object.get("permalink");
+                this.pretext = pretext;
 
-            String type = (String) object.get("filetype");
-            if (type != null) {
-                switch (type) {
-                    case "png":
-                        pretext = null;
-                        imageUrl = (String) object.get("url_private");
-                        footer = pretext;
-                        break;
-                    case "text":
-                        text = (String) object.get("preview");
-                        break;
-                    default:
-                        text = (String) object.get("preview");
-                        textType = type;
-                        break;
+                String fileType = (String) object.get("filetype");
+                if (fileType != null) {
+                    switch (fileType) {
+                        case "png":
+                            pretext = null;
+                            imageUrl = (String) object.get("url_private");
+                            footer = pretext;
+                            break;
+                        case "text":
+                            text = (String) object.get("preview");
+                            break;
+                        default:
+                            text = (String) object.get("preview");
+                            textType = fileType;
+                            break;
+                    }
                 }
-            }
-        } else {
-            title = (String) object.get("title");
-            titleLink = (String) object.get("title_link");
-            authorName = (String) object.get("author_name");
-            authorLink = (String) object.get("author_link");
-            authorIcon = (String) object.get("author_icon");
-            pretext = (String) object.get("pretext");
-            text = (String) object.get("text");
-            imageUrl = (String) object.get("image_url");
-            thumbUrl = (String) object.get("thumb_url");
-            footer = (String) object.get("footer");
-            footerIcon = (String) object.get("footer_icon");
+                break;
         }
     }
 
