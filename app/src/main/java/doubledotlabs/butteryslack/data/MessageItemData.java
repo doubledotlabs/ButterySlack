@@ -74,35 +74,37 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
             if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
                 holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
-            if (contentHtml != null)
-                holder.subtitle.setText(contentHtml);
-            else {
-                new Action<String>() {
-                    @NonNull
-                    @Override
-                    public String id() {
-                        return "html";
-                    }
-
-                    @Nullable
-                    @Override
-                    protected String run() throws InterruptedException {
-                        return SlackUtils.getHtmlMessage(getButterySlack(), content);
-                    }
-
-                    @Override
-                    protected void done(@Nullable String result) {
-                        if (result != null && holder.subtitle != null) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                                contentHtml = Html.fromHtml(result, 0);
-                            else contentHtml = Html.fromHtml(result);
-
-                            holder.subtitle.setText(contentHtml);
+            if (content != null) {
+                if (contentHtml != null)
+                    holder.subtitle.setText(contentHtml);
+                else {
+                    new Action<String>() {
+                        @NonNull
+                        @Override
+                        public String id() {
+                            return "html";
                         }
-                    }
-                }.execute();
-            }
-        } else holder.subtitle.setVisibility(View.GONE);
+
+                        @Nullable
+                        @Override
+                        protected String run() throws InterruptedException {
+                            return SlackUtils.getHtmlMessage(getButterySlack(), content);
+                        }
+
+                        @Override
+                        protected void done(@Nullable String result) {
+                            if (result != null && holder.subtitle != null) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                                    contentHtml = Html.fromHtml(result, 0);
+                                else contentHtml = Html.fromHtml(result);
+
+                                holder.subtitle.setText(contentHtml);
+                            }
+                        }
+                    }.execute();
+                }
+            } else holder.subtitle.setVisibility(View.GONE);
+        }
     }
 
     public static MessageItemData from(Context context, JSONObject object) {
