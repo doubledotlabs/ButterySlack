@@ -85,7 +85,7 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
         if (isReply()) {
             holder.title.setVisibility(View.GONE);
             holder.imageView.setVisibility(View.GONE);
-            holder.message.setPadding(0, 0, 0, 0);
+            holder.message.setPadding(0, ConversionUtils.getPixelsFromDp(1), 0, 0);
         } else if (getSender() != null) {
             holder.title.setVisibility(View.VISIBLE);
             holder.imageView.setVisibility(View.VISIBLE);
