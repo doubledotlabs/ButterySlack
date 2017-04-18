@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
     @Nullable
     private SlackUser sender;
     private String content;
+    private Spanned contentHtml;
     private String timestamp;
 
     public MessageItemData(@Nullable SlackUser sender, String content, String timestamp) {
@@ -72,28 +74,34 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
             if (!(holder.subtitle.getMovementMethod() instanceof SlackMovementMethod) && getContext() instanceof AppCompatActivity)
                 holder.subtitle.setMovementMethod(new SlackMovementMethod((AppCompatActivity) getContext()));
 
-            new Action<String>() {
-                @NonNull
-                @Override
-                public String id() {
-                    return "html";
-                }
-
-                @Nullable
-                @Override
-                protected String run() throws InterruptedException {
-                    return SlackUtils.getHtmlMessage(getButterySlack(), content);
-                }
-
-                @Override
-                protected void done(@Nullable String result) {
-                    if (result != null && holder.subtitle != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                            holder.subtitle.setText(Html.fromHtml(result, 0));
-                        else holder.subtitle.setText(Html.fromHtml(result));
+            if (contentHtml != null)
+                holder.subtitle.setText(contentHtml);
+            else {
+                new Action<String>() {
+                    @NonNull
+                    @Override
+                    public String id() {
+                        return "html";
                     }
-                }
-            }.execute();
+
+                    @Nullable
+                    @Override
+                    protected String run() throws InterruptedException {
+                        return SlackUtils.getHtmlMessage(getButterySlack(), content);
+                    }
+
+                    @Override
+                    protected void done(@Nullable String result) {
+                        if (result != null && holder.subtitle != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                                contentHtml = Html.fromHtml(result, 0);
+                            else contentHtml = Html.fromHtml(result);
+
+                            holder.subtitle.setText(contentHtml);
+                        }
+                    }
+                }.execute();
+            }
         } else holder.subtitle.setVisibility(View.GONE);
     }
 

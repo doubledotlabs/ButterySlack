@@ -1,5 +1,6 @@
 package doubledotlabs.butteryslack.data;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
@@ -29,6 +30,7 @@ import doubledotlabs.butteryslack.utils.ViewUtils;
 public class UserMessageItemData extends MessageItemData<UserMessageItemData.ViewHolder> {
 
     private List<AttachmentData> attachments;
+    private String senderImage;
 
     public UserMessageItemData(@Nullable SlackUser sender, String content, String timestamp) {
         super(sender, content, timestamp);
@@ -90,32 +92,42 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
             holder.imageView.setVisibility(View.VISIBLE);
             holder.message.setPadding(0, (int) ViewUtils.getPixelsFromDp(12), 0, 0);
 
-            new Action<String>() {
-                @NonNull
-                @Override
-                public String id() {
-                    return "image" + getSender().getId();
-                }
+            if (senderImage != null) {
+                Glide.with(getButterySlack())
+                        .load(senderImage)
+                        .placeholder(new ColorDrawable(ContextCompat.getColor(holder.imageView.getContext(), R.color.colorAccent)))
+                        .thumbnail(0.2f)
+                        .into(holder.imageView);
+            } else {
+                new Action<String>() {
+                    @NonNull
+                    @Override
+                    public String id() {
+                        return "image" + getSender().getId();
+                    }
 
-                @Nullable
-                @Override
-                protected String run() throws InterruptedException {
-                    return SlackUtils.getProfilePicture(getButterySlack(), getSender().getId());
-                }
+                    @Nullable
+                    @Override
+                    protected String run() throws InterruptedException {
+                        return SlackUtils.getProfilePicture(getButterySlack(), getSender().getId());
+                    }
 
-                @Override
-                protected void done(@Nullable String result) {
-                    if (result != null) {
-                        if (holder.imageView != null) {
-                            Glide.with(getButterySlack())
-                                    .load(result)
-                                    .placeholder(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.colorAccent)))
-                                    .thumbnail(0.2f)
-                                    .into(holder.imageView);
+                    @Override
+                    protected void done(@Nullable String result) {
+                        if (result != null) {
+                            Context context = getContext();
+                            senderImage = result;
+                            if (context != null && holder.imageView != null) {
+                                Glide.with(getButterySlack())
+                                        .load(senderImage)
+                                        .placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.colorAccent)))
+                                        .thumbnail(0.2f)
+                                        .into(holder.imageView);
+                            }
                         }
                     }
-                }
-            }.execute();
+                }.execute();
+            }
         } else {
             holder.title.setVisibility(View.GONE);
             holder.imageView.setVisibility(View.GONE);
