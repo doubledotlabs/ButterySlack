@@ -23,7 +23,6 @@ import java.util.List;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
-import doubledotlabs.butteryslack.utils.ConversionUtils;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 import doubledotlabs.butteryslack.utils.ViewUtils;
 
@@ -85,11 +84,11 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
         if (isReply()) {
             holder.title.setVisibility(View.GONE);
             holder.imageView.setVisibility(View.GONE);
-            holder.message.setPadding(0, ConversionUtils.getPixelsFromDp(1), 0, 0);
+            holder.message.setPadding(0, (int) ViewUtils.getPixelsFromDp(1), 0, 0);
         } else if (getSender() != null) {
             holder.title.setVisibility(View.VISIBLE);
             holder.imageView.setVisibility(View.VISIBLE);
-            holder.message.setPadding(0, ConversionUtils.getPixelsFromDp(12), 0, 0);
+            holder.message.setPadding(0, (int) ViewUtils.getPixelsFromDp(12), 0, 0);
 
             new Action<String>() {
                 @NonNull
