@@ -16,7 +16,9 @@ import java.util.List;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
-import doubledotlabs.butteryslack.fragments.ChannelFragment;
+import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
+import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
+import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.ViewHolder> implements View.OnClickListener {
@@ -40,25 +42,35 @@ public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.Vi
             holder.prefix.setText("@");
 
             List<SlackUser> members = new ArrayList<>(channel.getMembers());
-            if (members.size() > 0)
-                holder.title.setText(members.get(0).getUserName());
+            if (members.size() > 0) {
+                SlackUser member = members.get(0);
+                holder.title.setText(member.getUserName());
+                holder.subtitle.setText(member.getRealName());
+            }
         } else {
             holder.prefix.setText("#");
             holder.title.setText(channel.getName());
+            holder.subtitle.setText(subtitle);
         }
 
-        holder.subtitle.setText(subtitle);
         holder.itemView.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         Bundle args = new Bundle();
-        args.putString(ChannelFragment.EXTRA_CHANNEL_ID, channel.getId());
+        args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, channel.getId());
 
-        ChannelFragment fragment = new ChannelFragment();
+        BaseMessageFragment fragment;
+        switch (channel.getType()) {
+            case INSTANT_MESSAGING:
+                fragment = new InstantMessageFragment();
+                break;
+            default:
+                fragment = new ChannelMessageFragment();
+        }
+
         fragment.setArguments(args);
-
         if (v.getContext() != null && v.getContext() instanceof AppCompatActivity)
             ((AppCompatActivity) v.getContext()).getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commit();
     }

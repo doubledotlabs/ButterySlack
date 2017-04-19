@@ -23,9 +23,7 @@ import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
-public class ChannelFragment extends ChatFragment {
-
-    public static final String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
+public class ChannelMessageFragment extends BaseMessageFragment {
 
     @Nullable
     private String channelId;

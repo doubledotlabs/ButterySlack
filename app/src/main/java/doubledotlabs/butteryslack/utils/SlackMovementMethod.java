@@ -19,7 +19,7 @@ import com.ullink.slack.simpleslackapi.SlackChannel;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.fragments.ChannelFragment;
+import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
 
 public class SlackMovementMethod extends LinkMovementMethod {
 
@@ -89,9 +89,9 @@ public class SlackMovementMethod extends LinkMovementMethod {
                     protected void done(@Nullable String result) {
                         if (result != null) {
                             Bundle args = new Bundle();
-                            args.putString(ChannelFragment.EXTRA_CHANNEL_ID, result);
+                            args.putString(ChannelMessageFragment.EXTRA_CHANNEL_ID, result);
 
-                            ChannelFragment fragment = new ChannelFragment();
+                            ChannelMessageFragment fragment = new ChannelMessageFragment();
                             fragment.setArguments(args);
                             activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commit();
                         }
