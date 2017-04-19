@@ -9,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ullink.slack.simpleslackapi.SlackChannel;
+import com.ullink.slack.simpleslackapi.SlackUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
@@ -32,7 +36,17 @@ public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.title.setText(channel.getName());
+        if (channel.getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) {
+            holder.prefix.setText("@");
+
+            List<SlackUser> members = new ArrayList<>(channel.getMembers());
+            if (members.size() > 0)
+                holder.title.setText(members.get(0).getUserName());
+        } else {
+            holder.prefix.setText("#");
+            holder.title.setText(channel.getName());
+        }
+
         holder.subtitle.setText(subtitle);
         holder.itemView.setOnClickListener(this);
     }
@@ -51,12 +65,13 @@ public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView title, subtitle;
+        TextView title, subtitle, prefix;
 
         public ViewHolder(View itemView) {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.title);
             subtitle = (TextView) itemView.findViewById(R.id.subtitle);
+            prefix = (TextView) itemView.findViewById(R.id.prefix);
         }
     }
 }
