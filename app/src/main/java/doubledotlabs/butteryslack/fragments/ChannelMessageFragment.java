@@ -53,7 +53,7 @@ public class ChannelMessageFragment extends BaseMessageFragment {
                 if (result != null) {
                     channel = result;
                     channelId = result.getId();
-                    setTitle(String.format(Locale.getDefault(), getString(R.string.title_channel), result.getName()));
+                    setTitle(String.format(Locale.getDefault(), getString(R.string.title_channel_name), result.getName()));
                     registerListener();
                 } else
                     Log.e("ChannelFragment", "Channel Id: " + (channelId != null ? channelId : "null"));

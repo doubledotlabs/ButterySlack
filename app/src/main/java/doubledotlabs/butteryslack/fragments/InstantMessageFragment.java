@@ -57,7 +57,7 @@ public class InstantMessageFragment extends BaseMessageFragment {
 
                     List<SlackUser> members = new ArrayList<>(channel.getMembers());
                     if (members.size() > 0) {
-                        setTitle(String.format(Locale.getDefault(), getString(R.string.title_instant), members.get(0).getUserName()));
+                        setTitle(String.format(Locale.getDefault(), getString(R.string.title_instant_name), members.get(0).getUserName()));
                     }
 
                     registerListener();

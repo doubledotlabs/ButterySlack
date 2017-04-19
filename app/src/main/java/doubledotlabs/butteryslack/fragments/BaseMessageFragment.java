@@ -39,7 +39,7 @@ import doubledotlabs.butteryslack.data.LoadingItemData;
 import doubledotlabs.butteryslack.data.MessageItemData;
 
 
-public abstract class BaseMessageFragment extends ButteryFragment implements SlackMessagePostedListener {
+public abstract class BaseMessageFragment extends BaseFragment implements SlackMessagePostedListener {
 
     public static final String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
 

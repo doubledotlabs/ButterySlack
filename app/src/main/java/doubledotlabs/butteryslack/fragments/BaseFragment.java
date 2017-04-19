@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 
 import doubledotlabs.butteryslack.ButterySlack;
 
-public class ButteryFragment extends Fragment {
+public class BaseFragment extends Fragment {
 
     private ButterySlack butterySlack;
     private FragmentListener listener;

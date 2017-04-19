@@ -14,15 +14,15 @@ import android.view.View;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
-import doubledotlabs.butteryslack.fragments.ButteryFragment;
+import doubledotlabs.butteryslack.fragments.BaseFragment;
 import doubledotlabs.butteryslack.fragments.HomeFragment;
 
-public class HomeActivity extends AppCompatActivity implements ButteryFragment.FragmentListener {
+public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
 
     private ButterySlack butterySlack;
 
     private Toolbar toolbar;
-    private ButteryFragment fragment;
+    private BaseFragment fragment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class HomeActivity extends AppCompatActivity implements ButteryFragment.F
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                fragment = (ButteryFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+                fragment = (BaseFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
                 setListeners(fragment);
 
                 ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity implements ButteryFragment.F
         });
 
         if (savedInstanceState != null) {
-            fragment = (ButteryFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+            fragment = (BaseFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
             if (fragment != null) {
                 setListeners(fragment);
                 return;
@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity implements ButteryFragment.F
         setListeners(fragment);
     }
 
-    private void setListeners(ButteryFragment fragment) {
+    private void setListeners(BaseFragment fragment) {
         fragment.setListener(this);
     }
 
