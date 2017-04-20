@@ -7,4 +7,5 @@
     <string name="title_channel_name">#%1$s</string>
     <string name="title_instant_name">\@%1$s</string>
     <string name="prompt_message">Type a message...</string>
+    <string name="title_switch_user">Switch User</string>
 </resources>

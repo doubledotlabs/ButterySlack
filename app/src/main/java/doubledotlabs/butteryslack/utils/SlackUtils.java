@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import doubledotlabs.butteryslack.ButterySlack;
-import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.data.EmojiData;
 
 public class SlackUtils {
@@ -141,6 +140,7 @@ public class SlackUtils {
     }
 
     public static GlideUrl getUrl(Context context, String url) {
-        return new GlideUrl(url, new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + context.getString(R.string.token)).build());
+        ButterySlack butterySlack = (ButterySlack) context.getApplicationContext();
+        return new GlideUrl(url, new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + butterySlack.getToken()).build());
     }
 }

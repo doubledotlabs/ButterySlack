@@ -1,11 +1,13 @@
 package doubledotlabs.butteryslack.activities;
 
 import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -20,6 +22,7 @@ import doubledotlabs.butteryslack.fragments.HomeFragment;
 public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
 
     private ButterySlack butterySlack;
+    private Integer selectedTokenIndex;
 
     private Toolbar toolbar;
     private BaseFragment fragment;
@@ -92,6 +95,31 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
                 onBackPressed();
                 break;
             case R.id.action_settings:
+                break;
+            case R.id.action_switch_user:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.title_switch_user)
+                        .setSingleChoiceItems(butterySlack.getTokenNames().toArray(new String[butterySlack.getTokensLength()]), butterySlack.getTokenIndex(), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectedTokenIndex = which;
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectedTokenIndex = null;
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                butterySlack.setTokenIndex(HomeActivity.this, selectedTokenIndex);
+                            }
+                        })
+                        .show();
                 break;
         }
         return super.onOptionsItemSelected(item);
