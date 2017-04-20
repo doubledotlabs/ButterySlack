@@ -30,7 +30,13 @@ public class MainActivity extends AppCompatActivity implements ButterySlack.Conn
         if (message != null) {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         } else {
-            startActivity(new Intent(this, HomeActivity.class));
+            Intent intent = new Intent(this, HomeActivity.class);
+
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null)
+                intent.putExtras(bundle);
+
+            startActivity(intent);
         }
         finish();
     }

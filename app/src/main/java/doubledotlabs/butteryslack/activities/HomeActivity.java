@@ -17,9 +17,15 @@ import android.view.View;
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.fragments.BaseFragment;
+import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
+import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
 import doubledotlabs.butteryslack.fragments.HomeFragment;
+import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
 
 public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
+
+    public static String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
+    public static String EXTRA_INSTANT_ID = "doubledotlabs.butteryslack.EXTRA_INSTANT_ID";
 
     private ButterySlack butterySlack;
     private Integer selectedTokenIndex;
@@ -73,7 +79,21 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
             }
         }
 
-        fragment = new HomeFragment();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey(EXTRA_CHANNEL_ID)) {
+            Bundle args = new Bundle();
+            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, extras.getString(EXTRA_CHANNEL_ID));
+
+            fragment = new ChannelMessageFragment();
+            fragment.setArguments(args);
+        } else if (extras != null && extras.containsKey(EXTRA_INSTANT_ID)) {
+            Bundle args = new Bundle();
+            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, extras.getString(EXTRA_INSTANT_ID));
+
+            fragment = new InstantMessageFragment();
+            fragment.setArguments(args);
+        } else fragment = new HomeFragment();
+
         getSupportFragmentManager().beginTransaction().add(R.id.fragment, fragment).commit();
         setListeners(fragment);
     }

@@ -6,6 +6,9 @@
     <string name="title_instant_messages">Instant Messages</string>
     <string name="title_channel_name">#%1$s</string>
     <string name="title_instant_name">\@%1$s</string>
-    <string name="prompt_message">Type a message...</string>
     <string name="title_switch_user">Switch User</string>
+    <string name="title_message_notification">%1$s in %2$s</string>
+
+    <string name="prompt_message">Type a message...</string>
+
 </resources>
