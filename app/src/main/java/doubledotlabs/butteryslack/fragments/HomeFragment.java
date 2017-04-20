@@ -22,7 +22,7 @@ public class HomeFragment extends BaseFragment implements BottomNavigationView.O
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
-        setTitle(getString(R.string.app_name));
+        setTitle(getButterySlack().getTokenName());
 
         viewPager = (ViewPager) v.findViewById(R.id.viewPager);
         navigation = (BottomNavigationView) v.findViewById(R.id.navigation);

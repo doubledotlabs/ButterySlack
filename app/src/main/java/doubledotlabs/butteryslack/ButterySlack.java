@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import doubledotlabs.butteryslack.activities.MainActivity;
 import doubledotlabs.butteryslack.data.EmojiData;
+import doubledotlabs.butteryslack.services.NotificationService;
 
 
 public class ButterySlack extends Application {
@@ -42,7 +43,7 @@ public class ButterySlack extends Application {
     private int tokenIndex;
 
     public SlackSession session;
-    private ConnectionListener connectionListener;
+    private List<ConnectionListener> listeners;
 
     @Nullable
     private List<EmojiData> emojis;
@@ -51,8 +52,14 @@ public class ButterySlack extends Application {
     public void onCreate() {
         super.onCreate();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        listeners = new ArrayList<>();
 
         tokens = getResources().getStringArray(R.array.tokens);
+        tokenIndex = prefs.getInt(PREF_TOKEN, 0);
+        connect();
+    }
+
+    public void reconnect() {
         tokenIndex = prefs.getInt(PREF_TOKEN, 0);
         connect();
     }
@@ -78,6 +85,18 @@ public class ButterySlack extends Application {
                             return e.toString();
                         }
                         return null;
+                    }
+
+                    @Override
+                    protected void done(@Nullable String result) {
+                        super.done(result);
+                        if (result == null) {
+                            prefs.edit().putString(String.format(Locale.getDefault(), PREF_TOKEN_NAME, String.valueOf(getTokenIndex())), session.getTeam().getName()).apply();
+
+                            Intent intent = new Intent(ButterySlack.this, NotificationService.class);
+                            intent.putExtra(NotificationService.EXTRA_TOKEN_INDEX, getTokenIndex());
+                            startService(intent);
+                        }
                     }
                 },
                 new Action<List<EmojiData>>() {
@@ -120,18 +139,19 @@ public class ButterySlack extends Application {
         ).done(new Done() {
             @Override
             public void result(@NonNull Result result) {
-                if (connectionListener != null) {
-                    Action<String> connect = (Action<String>) result.get("connect");
-                    if (connect != null && connectionListener != null)
-                        connectionListener.onConnect(connect.getResult());
+                Action<String> connect = (Action<String>) result.get("connect");
+                if (connect != null) {
+                    String resultString = connect.getResult();
+                    for (ConnectionListener listener : listeners) {
+                        listener.onConnect(resultString);
+                    }
                 }
             }
         });
     }
 
-    public void setTokenIndex(Activity activity, int index) {
+    public void setTokenIndex(@Nullable Activity activity, int index) {
         if (index != tokenIndex) {
-            tokenIndex = index;
             prefs.edit().putInt(PREF_TOKEN, index).apply();
             if (session != null) {
                 try {
@@ -141,9 +161,12 @@ public class ButterySlack extends Application {
                 }
             }
 
-            activity.finish();
-            activity.startActivity(new Intent(this, MainActivity.class));
-            connect();
+            if (activity != null) {
+                activity.finish();
+                activity.startActivity(new Intent(this, MainActivity.class));
+            }
+
+            reconnect();
         }
     }
 
@@ -153,6 +176,10 @@ public class ButterySlack extends Application {
 
     public int getTokenIndex() {
         return tokenIndex;
+    }
+
+    public String getTokenName() {
+        return getTokenName(getTokenIndex());
     }
 
     public String getTokenName(int index) {
@@ -182,11 +209,14 @@ public class ButterySlack extends Application {
         super.onTerminate();
     }
 
-    public void setConnectionListener(ConnectionListener listener) {
-        connectionListener = listener;
-        if (connectionListener != null && session.isConnected()) {
-            connectionListener.onConnect(null);
-        }
+    public void addListener(ConnectionListener listener) {
+        listeners.add(listener);
+        if (session.isConnected())
+            listener.onConnect(null);
+    }
+
+    public void removeListener(ConnectionListener listener) {
+        listeners.remove(listener);
     }
 
     public interface ConnectionListener {

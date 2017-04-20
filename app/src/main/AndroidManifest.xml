@@ -21,6 +21,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.HomeActivity" />
+
+        <service
+            android:name=".services.NotificationService"
+            android:process=":notifications" />
     </application>
 
 </manifest>

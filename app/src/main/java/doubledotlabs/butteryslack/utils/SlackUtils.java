@@ -11,7 +11,9 @@ import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
 
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,11 +41,25 @@ public class SlackUtils {
         }
     }
 
+    public static String getChannelName(SlackChannel channel) {
+        if (channel.getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) {
+            List<SlackUser> members = new ArrayList<>(channel.getMembers());
+            if (members.size() > 0)
+                return members.get(0).getRealName();
+        }
+
+        return channel.getName();
+    }
+
     public static String getChannelTopic(SlackChannel channel) {
         String topic = channel.getTopic();
         if (topic == null || topic.length() < 1)
             topic = channel.getPurpose();
         return topic;
+    }
+
+    public static long getTimestamp(String timestamp) {
+        return Long.parseLong(timestamp.split(".")[0]);
     }
 
     public static String getEmojiMessage(ButterySlack butterySlack, String content) {

@@ -16,12 +16,12 @@ public class MainActivity extends AppCompatActivity implements ButterySlack.Conn
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         slack = (ButterySlack) getApplicationContext();
-        slack.setConnectionListener(this);
+        slack.addListener(this);
     }
 
     @Override
     protected void onDestroy() {
-        slack.setConnectionListener(null);
+        slack.removeListener(this);
         super.onDestroy();
     }
 
