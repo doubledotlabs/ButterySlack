@@ -72,13 +72,17 @@ public class NotificationService extends Service implements ButterySlack.Connect
         try {
             String senderName = event.getSender().getUserName();
             String channelName = SlackUtils.getChannelName(event.getChannel());
-            if ((event.getChannel().isMember() || event.getChannel().getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) && (!senderName.equals(butterySlack.session.sessionPersona().getUserName()) || messages.containsKey(channelName))) {
+            boolean isInstant = event.getChannel().getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING;
+            boolean isMe = senderName.equals(butterySlack.session.sessionPersona().getUserName());
+            if ((event.getChannel().isMember() || isInstant) && (!isMe || messages.containsKey(channelName))) {
+                String title = String.format(Locale.getDefault(), getString(isInstant ? R.string.title_instant_name : R.string.title_channel_name), isInstant ? senderName : channelName);
+
                 NotificationCompat.MessagingStyle style;
                 if (messages.containsKey(channelName))
                     style = messages.get(channelName);
                 else {
                     style = new NotificationCompat.MessagingStyle(butterySlack.getTokenName());
-                    style.setConversationTitle(channelName);
+                    style.setConversationTitle(title);
                     messages.put(channelName, style);
                 }
 
@@ -103,7 +107,7 @@ public class NotificationService extends Service implements ButterySlack.Connect
                         .build();
 
                 notificationManager.notify(messages.indexOfKey(channelName), new NotificationCompat.Builder(this)
-                        .setContentTitle(String.format(Locale.getDefault(), getString(R.string.title_message_notification), senderName, channelName))
+                        .setContentTitle(isInstant ? title : String.format(Locale.getDefault(), getString(R.string.title_message_notification), senderName, channelName))
                         .setContentText(event.getMessageContent())
                         .setContentIntent(pendingIntent)
                         .addAction(action)
@@ -111,8 +115,8 @@ public class NotificationService extends Service implements ButterySlack.Connect
                         .setColor(ContextCompat.getColor(this, R.color.colorAccent))
                         .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
-                        .setPriority(senderName.equals(butterySlack.session.sessionPersona().getUserName()) ? NotificationCompat.PRIORITY_MIN : NotificationCompat.PRIORITY_HIGH)
-                        .setVibrate(senderName.equals(butterySlack.session.sessionPersona().getUserName()) ? null : new long[]{1})
+                        .setPriority(isMe ? NotificationCompat.PRIORITY_MIN : NotificationCompat.PRIORITY_HIGH)
+                        .setVibrate(isMe ? null : new long[]{1})
                         .setAutoCancel(true)
                         .setStyle(style)
                         .build());
