@@ -79,19 +79,28 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
             }
         }
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.containsKey(EXTRA_CHANNEL_ID)) {
+        if (getIntent().hasExtra(EXTRA_CHANNEL_ID)) {
             Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, extras.getString(EXTRA_CHANNEL_ID));
+            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_CHANNEL_ID));
+            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
 
             fragment = new ChannelMessageFragment();
             fragment.setArguments(args);
-        } else if (extras != null && extras.containsKey(EXTRA_INSTANT_ID)) {
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null)
+                actionBar.setDisplayHomeAsUpEnabled(true);
+        } else if (getIntent().hasExtra(EXTRA_INSTANT_ID)) {
             Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, extras.getString(EXTRA_INSTANT_ID));
+            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_INSTANT_ID));
+            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
 
             fragment = new InstantMessageFragment();
             fragment.setArguments(args);
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null)
+                actionBar.setDisplayHomeAsUpEnabled(true);
         } else fragment = new HomeFragment();
 
         getSupportFragmentManager().beginTransaction().add(R.id.fragment, fragment).commit();

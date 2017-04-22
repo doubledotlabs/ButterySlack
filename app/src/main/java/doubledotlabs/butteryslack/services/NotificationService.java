@@ -7,9 +7,10 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.RemoteInput;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArrayMap;
-import android.util.Log;
 
 import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackSession;
@@ -22,6 +23,7 @@ import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.activities.HomeActivity;
 import doubledotlabs.butteryslack.activities.MainActivity;
+import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public class NotificationService extends Service implements ButterySlack.ConnectionListener, SlackMessagePostedListener {
@@ -67,39 +69,56 @@ public class NotificationService extends Service implements ButterySlack.Connect
 
     @Override
     public void onEvent(SlackMessagePosted event, SlackSession session) {
-        String senderName = event.getSender().getUserName();
-        if ((event.getChannel().isMember() || event.getChannel().getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) && !senderName.equals(butterySlack.session.sessionPersona().getUserName())) {
+        try {
+            String senderName = event.getSender().getUserName();
             String channelName = SlackUtils.getChannelName(event.getChannel());
-            Log.d("Notification", channelName);
+            if ((event.getChannel().isMember() || event.getChannel().getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) && (!senderName.equals(butterySlack.session.sessionPersona().getUserName()) || messages.containsKey(channelName))) {
+                NotificationCompat.MessagingStyle style;
+                if (messages.containsKey(channelName))
+                    style = messages.get(channelName);
+                else {
+                    style = new NotificationCompat.MessagingStyle(butterySlack.getTokenName());
+                    style.setConversationTitle(channelName);
+                    messages.put(channelName, style);
+                }
 
-            NotificationCompat.MessagingStyle style;
-            if (messages.containsKey(channelName))
-                style = messages.get(channelName);
-            else {
-                style = new NotificationCompat.MessagingStyle(butterySlack.getTokenName());
-                style.setConversationTitle(channelName);
-                messages.put(channelName, style);
+                style.addMessage(event.getMessageContent(), System.currentTimeMillis(), senderName);
+
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra(event.getChannel().isMember() ? HomeActivity.EXTRA_CHANNEL_ID : HomeActivity.EXTRA_INSTANT_ID, event.getChannel().getId());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                stackBuilder.addParentStack(MainActivity.class);
+                stackBuilder.addNextIntent(intent);
+
+                PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
+
+                String replyTitle = getString(R.string.title_reply);
+                NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.ic_message_notification, replyTitle, pendingIntent)
+                        .addRemoteInput(new RemoteInput.Builder(BaseMessageFragment.EXTRA_REPLY)
+                                .setLabel(replyTitle)
+                                .build())
+                        .setAllowGeneratedReplies(true)
+                        .build();
+
+                notificationManager.notify(messages.indexOfKey(channelName), new NotificationCompat.Builder(this)
+                        .setContentTitle(String.format(Locale.getDefault(), getString(R.string.title_message_notification), senderName, channelName))
+                        .setContentText(event.getMessageContent())
+                        .setContentIntent(pendingIntent)
+                        .addAction(action)
+                        .setSmallIcon(R.drawable.ic_message_notification)
+                        .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setPriority(senderName.equals(butterySlack.session.sessionPersona().getUserName()) ? NotificationCompat.PRIORITY_MIN : NotificationCompat.PRIORITY_HIGH)
+                        .setVibrate(senderName.equals(butterySlack.session.sessionPersona().getUserName()) ? null : new long[]{1})
+                        .setAutoCancel(true)
+                        .setStyle(style)
+                        .build());
             }
-
-            style.addMessage(event.getMessageContent(), System.currentTimeMillis(), senderName);
-
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(event.getChannel().isMember() ? HomeActivity.EXTRA_CHANNEL_ID : HomeActivity.EXTRA_INSTANT_ID, event.getChannel().getId());
-
-            notificationManager.notify(channelName, messages.indexOfKey(channelName), new NotificationCompat.Builder(this)
-                    .setContentTitle(String.format(Locale.getDefault(), getString(R.string.title_message_notification), senderName, channelName))
-                    .setContentText(event.getMessageContent())
-                    .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0))
-                    .setSmallIcon(R.drawable.ic_message_notification)
-                    .setColor(ContextCompat.getColor(this, R.color.colorAccent))
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setVibrate(new long[]{1})
-                    .setAutoCancel(true)
-                    .setStyle(style)
-                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

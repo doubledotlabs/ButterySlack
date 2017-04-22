@@ -42,6 +42,7 @@ import doubledotlabs.butteryslack.data.MessageItemData;
 public abstract class BaseMessageFragment extends BaseFragment implements SlackMessagePostedListener {
 
     public static final String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
+    public static final String EXTRA_REPLY = "doubledotlabs.butteryslack.EXTRA_REPLY";
 
     private List<BaseItemAdapter.BaseItem> messages;
     private List<BaseItemAdapter.BaseItem> oldMessages;
@@ -58,6 +59,9 @@ public abstract class BaseMessageFragment extends BaseFragment implements SlackM
     private boolean isRegistered;
     private String timestamp;
 
+    private String reply;
+    private boolean hasReplied;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,6 +72,8 @@ public abstract class BaseMessageFragment extends BaseFragment implements SlackM
         editText = (EditText) v.findViewById(R.id.editText);
         attachFile = v.findViewById(R.id.attachFile);
         send = v.findViewById(R.id.send);
+
+        reply = getArguments().getString(EXTRA_REPLY);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setReverseLayout(true);
@@ -163,6 +169,22 @@ public abstract class BaseMessageFragment extends BaseFragment implements SlackM
         if (!isRegistered) {
             getButterySlack().session.addMessagePostedListener(this);
             isRegistered = true;
+
+            if (reply != null && !hasReplied) {
+                Log.d("Reply", reply);
+                if (reply != null && reply.replaceAll("\\s+", "").length() > 0) {
+                    Action action = sendMessage(reply.trim());
+                    if (sendingPool != null && sendingPool.isExecuting())
+                        sendingPool.push(action);
+                    else sendingPool = Async.series(action).done(new Done() {
+                        @Override
+                        public void result(@NonNull Result result) {
+                            hasReplied = true;
+                            recyclerView.scrollToPosition(0);
+                        }
+                    });
+                }
+            }
         }
     }
 
