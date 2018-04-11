@@ -21,6 +21,7 @@ import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
 import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
 import doubledotlabs.butteryslack.fragments.HomeFragment;
 import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
+import doubledotlabs.butteryslack.activities.SettingsActivity;
 
 public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
 
@@ -124,6 +125,9 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
                 onBackPressed();
                 break;
             case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intent);
                 break;
             case R.id.action_switch_user:
                 new AlertDialog.Builder(this)
