@@ -2,13 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/action_channels"
-        android:title="@string/title_channels"
-        android:icon="@drawable/ic_channel" />
-
-    <item
-        android:id="@+id/action_instant_messages"
-        android:title="@string/title_instant_messages"
-        android:icon="@drawable/ic_instant_message" />
-
+        android:id="@+id/action_settings"
+        android:title="@string/title_settings"
+        android:icon="@drawable/ic_settings" />
 </menu>
