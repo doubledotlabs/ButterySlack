@@ -9,13 +9,16 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BasePagerAdapter;
 
 public class HomeFragment extends BaseFragment {
 
-    private ViewPager viewPager;
+    private FrameLayout frameLayout;
     private BottomNavigationView navigation;
 
     @Nullable
@@ -24,9 +27,12 @@ public class HomeFragment extends BaseFragment {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
         setTitle(getButterySlack().getTokenName());
 
-        viewPager = (ViewPager) v.findViewById(R.id.viewPager);
-
-        viewPager.setAdapter(new BasePagerAdapter(getChildFragmentManager(), new ChannelsFragment()));
+        frameLayout = (FrameLayout) v.findViewById(R.id.channelsFrame);
+        
+        FragmentManager manager = getChildFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.channelsFrame, new ChannelsFragment());
+        transaction.commit();
 
         return v;
     }
