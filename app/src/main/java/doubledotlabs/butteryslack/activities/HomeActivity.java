@@ -29,7 +29,7 @@ import doubledotlabs.butteryslack.fragments.HomeFragment;
 import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
 import doubledotlabs.butteryslack.activities.SettingsActivity;
 
-public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
+public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener, NavigationView.OnNavigationItemSelectedListener {
 
     public static String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
     public static String EXTRA_INSTANT_ID = "doubledotlabs.butteryslack.EXTRA_INSTANT_ID";
@@ -118,21 +118,7 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         drawerNavView = (NavigationView) findViewById(R.id.left_drawer);
-        drawerNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                switch (item.getItemId())
-                {
-                    case R.id.action_settings:
-                        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        getApplicationContext().startActivity(intent);
-                        break;
-                }
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            }
-        });
+        drawerNavView.setNavigationItemSelectedListener(this);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment, fragment).commit();
         setListeners(fragment);
     }
@@ -151,6 +137,20 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intent);
+                break;
+        }
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+    
     @Override
     public void onTitleChange(String title) {
         toolbar.setTitle(title);
