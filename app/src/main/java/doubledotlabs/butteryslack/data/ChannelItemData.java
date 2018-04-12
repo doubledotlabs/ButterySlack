@@ -1,5 +1,6 @@
 package doubledotlabs.butteryslack.data;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,7 @@ import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
 import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
 import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
 import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
+import doubledotlabs.butteryslack.activities.MessagesActivity;
 import doubledotlabs.butteryslack.utils.SlackUtils;
 
 public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.ViewHolder> implements View.OnClickListener {
@@ -58,21 +60,14 @@ public class ChannelItemData extends BaseItemAdapter.BaseItem<ChannelItemData.Vi
 
     @Override
     public void onClick(View v) {
-        Bundle args = new Bundle();
-        args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, channel.getId());
+				Intent intent = new Intent(v.getContext(), MessagesActivity.class);
 
-        BaseMessageFragment fragment;
-        switch (channel.getType()) {
-            case INSTANT_MESSAGING:
-                fragment = new InstantMessageFragment();
-                break;
-            default:
-                fragment = new ChannelMessageFragment();
-        }
-
-        fragment.setArguments(args);
-        if (v.getContext() != null && v.getContext() instanceof AppCompatActivity)
-            ((AppCompatActivity) v.getContext()).getSupportFragmentManager().beginTransaction().replace(R.id.fragment, fragment).addToBackStack(null).commit();
+				if (channel.getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING) {
+          intent.putExtra(MessagesActivity.EXTRA_INSTANT_ID, channel.getId());
+				} else {
+	        intent.putExtra(MessagesActivity.EXTRA_CHANNEL_ID, channel.getId());
+				}
+      v.getContext().startActivity(intent);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

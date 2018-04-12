@@ -52,7 +52,7 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
             finish();
             return;
         }
-        
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(butterySlack.session.getTeam().getName());
         setSupportActionBar(toolbar);
@@ -91,29 +91,7 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
             }
         }
 
-        if (getIntent().hasExtra(EXTRA_CHANNEL_ID)) {
-            Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_CHANNEL_ID));
-            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
-
-            fragment = new ChannelMessageFragment();
-            fragment.setArguments(args);
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(true);
-        } else if (getIntent().hasExtra(EXTRA_INSTANT_ID)) {
-            Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_INSTANT_ID));
-            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
-
-            fragment = new InstantMessageFragment();
-            fragment.setArguments(args);
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(true);
-        } else fragment = new HomeFragment();
+        fragment = new HomeFragment();
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -150,10 +128,10 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    
+
     @Override
     public void onTitleChange(String title) {
         toolbar.setTitle(title);
     }
-    
+
 }
