@@ -12,11 +12,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+
 import com.bumptech.glide.Glide;
 import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackFile;
-
-import org.json.simple.JSONObject;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BaseItemAdapter;
@@ -54,44 +57,93 @@ public class AttachmentData extends BaseItemAdapter.BaseItem<AttachmentData.View
         footerIcon = attachment.getFooterIcon();
     }
 
-    public AttachmentData(String type, JSONObject object) {
+    public AttachmentData(String type, JsonObject object) {
+				JsonElement titleJson = object.get("title");
+				JsonElement titleLinkJson = null;
         switch (type) {
             case TYPE_ATTACHMENT:
-                title = (String) object.get("title");
-                titleLink = (String) object.get("title_link");
-                authorName = (String) object.get("author_name");
-                authorLink = (String) object.get("author_link");
-                authorIcon = (String) object.get("author_icon");
-                pretext = (String) object.get("pretext");
-                text = (String) object.get("text");
-                imageUrl = (String) object.get("image_url");
-                thumbUrl = (String) object.get("thumb_url");
-                footer = (String) object.get("footer");
-                footerIcon = (String) object.get("footer_icon");
+                titleLinkJson = object.get("title_link");
+								JsonElement authorNameJson = object.get("author_name");
+								JsonElement authorLinkJson = object.get("author_link");
+								JsonElement authorIconJson = object.get("author_icon");
+								JsonElement pretextJson = object.get("pretext");
+								JsonElement textJson = object.get("text");
+								JsonElement imageUrlJson = object.get("image_url");
+								JsonElement thumbUrlJson = object.get("thumb_url");
+								JsonElement footerJson = object.get("footer");
+								JsonElement footerIconJson = object.get("footer_icon");
+
+								if (titleJson != null) {
+									title = titleJson.getAsString();
+								}
+								if (titleLinkJson != null) {
+									titleLink = titleLinkJson.getAsString();
+								}
+								if (authorNameJson != null) {
+                	authorName = authorNameJson.getAsString();
+							  }
+								if (authorLinkJson != null) {
+									authorLink = authorLinkJson.getAsString();
+								}
+								if (authorIconJson != null) {
+									authorIcon = authorIconJson.getAsString();
+								}
+								if (pretextJson != null) {
+									pretext = pretextJson.getAsString();
+								}
+								if (textJson != null)
+								{
+									text = textJson.getAsString();
+								}
+								if (imageUrlJson != null) {
+									imageUrl = imageUrlJson.getAsString();
+								}
+								if (thumbUrlJson != null) {
+									thumbUrl = thumbUrlJson.getAsString();
+								}
+								if (footerJson != null) {
+									footer = footerJson.getAsString();
+								}
+								if (footerIconJson != null) {
+									footerIcon = footerIconJson.getAsString();
+								}
                 break;
             case TYPE_FILE:
-                JSONObject comment = (JSONObject) object.get("initial_comment");
+						    JsonObject comment = null;
+								String pretext = null;
+								String title = null;
+								String fileType = null;
 
-                String title = (String) object.get("title");
-                String pretext = comment != null ? (String) comment.get("comment") : null;
+								titleLinkJson = object.get("permalink");
+						    JsonElement commentJson = object.get("initial_comment");
+								JsonElement fileTypeJson = object.get("filetype");
+
+								if (commentJson != null) {
+										comment = commentJson.getAsJsonObject();
+										pretext = comment.get("comment").getAsString();
+								}
+								if (titleJson != null) {
+										title = titleJson.getAsString();
+								}
 
                 this.title = title;
-                titleLink = (String) object.get("permalink");
+								if (titleLinkJson != null) {
+                		titleLink = titleLinkJson.getAsString();
+								}
                 this.pretext = pretext;
-
-                String fileType = (String) object.get("filetype");
-                if (fileType != null) {
+                if (fileTypeJson != null) {
+                		fileType = fileTypeJson.getAsString();
                     switch (fileType) {
                         case "png":
                             pretext = null;
-                            imageUrl = (String) object.get("url_private");
+                            imageUrl = object.get("url_private").getAsString();
                             footer = pretext;
                             break;
                         case "text":
-                            text = (String) object.get("preview");
+                            text = object.get("preview").getAsString();
                             break;
                         default:
-                            text = (String) object.get("preview");
+                            text = object.get("preview").getAsString();
                             textType = fileType;
                             break;
                     }

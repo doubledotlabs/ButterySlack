@@ -9,13 +9,16 @@ import com.ullink.slack.simpleslackapi.SlackMessageHandle;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.replies.GenericSlackReply;
 
-import org.json.simple.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.data.EmojiData;
@@ -33,9 +36,9 @@ public class SlackUtils {
         try {
             SlackMessageHandle<GenericSlackReply> handle = butterySlack.session.postGenericSlackCommand(params, "users.profile.get");
             GenericSlackReply reply = handle.getReply();
-            JSONObject object = reply.getPlainAnswer();
-            JSONObject profile = (JSONObject) object.get("profile");
-            return (String) profile.get("image_" + resolution);
+            JsonObject object = new Gson().fromJson(reply.getPlainAnswer(), JsonObject.class);
+            JsonObject profile = (JsonObject) object.get("profile");
+            return profile.get("image_" + resolution).getAsString();
         } catch (NullPointerException e) {
             return null;
         }

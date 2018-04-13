@@ -16,6 +16,7 @@ import android.widget.ImageView;
 
 import com.afollestad.async.Action;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
@@ -95,7 +96,8 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
             if (senderImage != null) {
                 Glide.with(getButterySlack())
                         .load(senderImage)
-                        .placeholder(new ColorDrawable(ContextCompat.getColor(holder.imageView.getContext(), R.color.colorAccent)))
+                        .apply(new RequestOptions()
+                            .placeholder(new ColorDrawable(ContextCompat.getColor(holder.imageView.getContext(), R.color.colorAccent))))
                         .thumbnail(0.2f)
                         .into(holder.imageView);
             } else {
@@ -120,7 +122,8 @@ public class UserMessageItemData extends MessageItemData<UserMessageItemData.Vie
                             if (context != null && holder.imageView != null) {
                                 Glide.with(getButterySlack())
                                         .load(senderImage)
-                                        .placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.colorAccent)))
+                                        .apply(new RequestOptions()
+                                            .placeholder(new ColorDrawable(ContextCompat.getColor(context, R.color.colorAccent))))
                                         .thumbnail(0.2f)
                                         .into(holder.imageView);
                             }
