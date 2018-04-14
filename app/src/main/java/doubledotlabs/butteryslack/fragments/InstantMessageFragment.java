@@ -11,8 +11,10 @@ import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,12 +92,12 @@ public class InstantMessageFragment extends BaseMessageFragment {
 
                 List<BaseItemAdapter.BaseItem> messages = new ArrayList<>();
 
-                JSONObject json = getButterySlack().session.postGenericSlackCommand(params, "im.history").getReply().getPlainAnswer();
-                JSONArray array = (JSONArray) json.get("messages");
+                JsonObject json = new Gson().fromJson(getButterySlack().session.postGenericSlackCommand(params, "im.history").getReply().getPlainAnswer(), JsonObject.class);
+                JsonArray array = json.get("messages").getAsJsonArray();
 
                 if (array != null) {
                     for (int i = 0; i < array.size(); i++) {
-                        MessageItemData message = MessageItemData.from(getContext(), (JSONObject) array.get(i));
+                        MessageItemData message = MessageItemData.from(getContext(), (JsonObject) array.get(i));
                         if (message != null) messages.add(message);
                     }
                 }

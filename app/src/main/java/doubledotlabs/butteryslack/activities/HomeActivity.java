@@ -1,11 +1,14 @@
 package doubledotlabs.butteryslack.activities;
 
 import android.animation.ValueAnimator;
+import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +16,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.support.design.widget.NavigationView;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.R;
@@ -21,8 +27,9 @@ import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
 import doubledotlabs.butteryslack.fragments.ChannelMessageFragment;
 import doubledotlabs.butteryslack.fragments.HomeFragment;
 import doubledotlabs.butteryslack.fragments.InstantMessageFragment;
+import doubledotlabs.butteryslack.activities.SettingsActivity;
 
-public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener {
+public class HomeActivity extends AppCompatActivity implements BaseFragment.FragmentListener, NavigationView.OnNavigationItemSelectedListener {
 
     public static String EXTRA_CHANNEL_ID = "doubledotlabs.butteryslack.EXTRA_CHANNEL_ID";
     public static String EXTRA_INSTANT_ID = "doubledotlabs.butteryslack.EXTRA_INSTANT_ID";
@@ -32,6 +39,8 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
 
     private Toolbar toolbar;
     private BaseFragment fragment;
+    private DrawerLayout drawer;
+    private NavigationView drawerNavView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +56,9 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(butterySlack.session.getTeam().getName());
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
@@ -79,30 +91,12 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
             }
         }
 
-        if (getIntent().hasExtra(EXTRA_CHANNEL_ID)) {
-            Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_CHANNEL_ID));
-            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
+        fragment = new HomeFragment();
 
-            fragment = new ChannelMessageFragment();
-            fragment.setArguments(args);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(true);
-        } else if (getIntent().hasExtra(EXTRA_INSTANT_ID)) {
-            Bundle args = new Bundle();
-            args.putString(BaseMessageFragment.EXTRA_CHANNEL_ID, getIntent().getStringExtra(EXTRA_INSTANT_ID));
-            args.putString(BaseMessageFragment.EXTRA_REPLY, getIntent().getStringExtra(BaseMessageFragment.EXTRA_REPLY));
-
-            fragment = new InstantMessageFragment();
-            fragment.setArguments(args);
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(true);
-        } else fragment = new HomeFragment();
-
+        drawerNavView = (NavigationView) findViewById(R.id.left_drawer);
+        drawerNavView.setNavigationItemSelectedListener(this);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment, fragment).commit();
         setListeners(fragment);
     }
@@ -112,50 +106,32 @@ public class HomeActivity extends AppCompatActivity implements BaseFragment.Frag
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
-                break;
-            case R.id.action_settings:
-                break;
-            case R.id.action_switch_user:
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.title_switch_user)
-                        .setSingleChoiceItems(butterySlack.getTokenNames().toArray(new String[butterySlack.getTokensLength()]), butterySlack.getTokenIndex(), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                selectedTokenIndex = which;
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                selectedTokenIndex = null;
-                                dialog.dismiss();
-                            }
-                        })
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                butterySlack.setTokenIndex(HomeActivity.this, selectedTokenIndex);
-                            }
-                        })
-                        .show();
+                drawer.openDrawer(GravityCompat.START);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intent);
+                break;
+        }
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
     public void onTitleChange(String title) {
         toolbar.setTitle(title);
     }
+
 }

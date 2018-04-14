@@ -1,5 +1,6 @@
 package doubledotlabs.butteryslack.data;
 
+import android.util.Log;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -13,13 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+
 import com.afollestad.async.Action;
 import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,20 +110,37 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
         }
     }
 
-    public static MessageItemData from(Context context, JSONObject object) {
+    public static MessageItemData from(Context context, JsonObject object) {
         ButterySlack butterySlack = (ButterySlack) context.getApplicationContext();
         MessageItemData itemData = null;
+				String subtype = null;
+        String senderId = null;
+        String content = null;
+        String timestamp = null;
 
-        String subtype = (String) object.get("subtype");
-        String senderId = (String) object.get("user");
-        String content = (String) object.get("text");
-        String timestamp = (String) object.get("ts");
+				JsonElement subtypeJson = object.get("subtype");
+				JsonElement senderIdJson = object.get("user");
+				JsonElement contentJson = object.get("text");
+				JsonElement timestampJson = object.get("ts");
+
+				if (subtypeJson != null) {
+					subtype = subtypeJson.getAsString();
+				}
+				if (senderIdJson != null) {
+					senderId = senderIdJson.getAsString();
+				}
+				if (contentJson != null) {
+					content = contentJson.getAsString();
+				}
+				if (timestampJson != null) {
+					timestamp = timestampJson.getAsString();
+				}
 
         List<AttachmentData> attachments = new ArrayList<>();
-        JSONArray array = (JSONArray) object.get("attachments");
-        if (array != null) {
-            for (Object attachment : array) {
-                attachments.add(new AttachmentData(AttachmentData.TYPE_ATTACHMENT, (JSONObject) attachment));
+				JsonElement arrayJson = object.get("attachments");
+        if (arrayJson != null) {
+            for (JsonElement attachment : arrayJson.getAsJsonArray()) {
+                attachments.add(new AttachmentData(AttachmentData.TYPE_ATTACHMENT, (JsonObject) attachment));
             }
         }
 
@@ -128,7 +148,7 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
             switch (subtype) {
                 case "bot_message":
                     itemData = new UserMessageItemData(
-                            butterySlack.session.findUserById(senderId != null ? senderId : (String) object.get("bot_id")),
+                            butterySlack.session.findUserById(senderId != null ? senderId : object.get("bot_id").getAsString()),
                             content,
                             timestamp,
                             attachments
@@ -158,7 +178,7 @@ public abstract class MessageItemData<T extends MessageItemData.ViewHolder> exte
                 case "file_share":
                     content = null;
 
-                    JSONObject file = (JSONObject) object.get("file");
+                    JsonObject file = (JsonObject) object.get("file");
                     if (file != null)
                         attachments.add(new AttachmentData(AttachmentData.TYPE_FILE, file));
                     break;
