@@ -1,7 +1,6 @@
 package doubledotlabs.butteryslack.data;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.json.simple.JSONObject;
 
 public class EmojiData {
 
@@ -52,11 +51,11 @@ public class EmojiData {
         return unicodes.length;
     }
 
-    public static EmojiData from(JsonObject object) {
+    public static EmojiData from(JSONObject object) {
         EmojiData emoji = new EmojiData();
-        emoji.name = object.get("short_name").getAsString();
-        emoji.file = object.get("image").getAsString();
-        emoji.unicode = object.get("unified").getAsString();
+        emoji.name = (String) object.get("short_name");
+        emoji.file = (String) object.get("image");
+        emoji.unicode = (String) object.get("unified");
         if (emoji.unicode != null)
             emoji.unicodes = emoji.unicode.split("-");
 

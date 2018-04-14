@@ -11,6 +11,5 @@
     <string name="title_reply">Reply</string>
 
     <string name="prompt_message">Type a message…</string>
-    
-    <string name="title_chats">Chats</string>
+
 </resources>

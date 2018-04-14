@@ -1,7 +1,2 @@
-*.iml
 build/
-gradle/
 .gradle/
-.idea/
-app/src/main/res/values/arrays.xml
-local.properties

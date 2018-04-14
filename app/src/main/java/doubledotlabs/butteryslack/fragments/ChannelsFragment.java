@@ -64,7 +64,7 @@ public class ChannelsFragment extends Fragment {
             protected void done(@Nullable Collection<SlackChannel> result) {
                 if (result != null) {
                     for (SlackChannel channel : result) {
-                        if (channel.isMember() || channel.getType() == SlackChannel.SlackChannelType.INSTANT_MESSAGING)
+                        if (channel.isMember())
                             channels.add(new ChannelItemData(channel));
                     }
                     adapter.notifyDataSetChanged();

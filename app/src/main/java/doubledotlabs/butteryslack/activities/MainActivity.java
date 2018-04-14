@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 import doubledotlabs.butteryslack.ButterySlack;
 import doubledotlabs.butteryslack.fragments.BaseMessageFragment;
-import doubledotlabs.butteryslack.activities.MessagesActivity;
 
 public class MainActivity extends AppCompatActivity implements ButterySlack.ConnectionListener {
 
@@ -34,21 +33,14 @@ public class MainActivity extends AppCompatActivity implements ButterySlack.Conn
         if (message != null) {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         } else {
-            Intent intent;
+            Intent intent = new Intent(this, HomeActivity.class);
 
-            //Was the application started to open a particular chat?
-            if (getIntent().hasExtra(MessagesActivity.EXTRA_CHANNEL_ID)) {
-						    intent = new Intent(this, MessagesActivity.class);
-                intent.putExtra(MessagesActivity.EXTRA_CHANNEL_ID, getIntent().getStringExtra(MessagesActivity.EXTRA_CHANNEL_ID));
-						}
-            else if (getIntent().hasExtra(MessagesActivity.EXTRA_INSTANT_ID)) {
-						    intent = new Intent(this, MessagesActivity.class);
-                intent.putExtra(MessagesActivity.EXTRA_INSTANT_ID, getIntent().getStringExtra(MessagesActivity.EXTRA_INSTANT_ID));
-						}	else {
-							intent = new Intent(this, HomeActivity.class);
-						}
+            if (getIntent().hasExtra(HomeActivity.EXTRA_CHANNEL_ID))
+                intent.putExtra(HomeActivity.EXTRA_CHANNEL_ID, getIntent().getStringExtra(HomeActivity.EXTRA_CHANNEL_ID));
 
-            //For replying via a notification
+            if (getIntent().hasExtra(HomeActivity.EXTRA_INSTANT_ID))
+                intent.putExtra(HomeActivity.EXTRA_INSTANT_ID, getIntent().getStringExtra(HomeActivity.EXTRA_INSTANT_ID));
+
             Bundle remoteInput = RemoteInput.getResultsFromIntent(getIntent());
             if (remoteInput != null) {
                 intent.putExtra(BaseMessageFragment.EXTRA_REPLY, remoteInput.getCharSequence(BaseMessageFragment.EXTRA_REPLY, "").toString());
