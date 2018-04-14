@@ -9,16 +9,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 
 import doubledotlabs.butteryslack.R;
 import doubledotlabs.butteryslack.adapters.BasePagerAdapter;
 
-public class HomeFragment extends BaseFragment {
+public class HomeFragment extends BaseFragment implements BottomNavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener {
 
-    private FrameLayout frameLayout;
+    private ViewPager viewPager;
     private BottomNavigationView navigation;
 
     @Nullable
@@ -27,13 +24,46 @@ public class HomeFragment extends BaseFragment {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
         setTitle(getButterySlack().getTokenName());
 
-        frameLayout = (FrameLayout) v.findViewById(R.id.channelsFrame);
-        
-        FragmentManager manager = getChildFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.channelsFrame, new ChannelsFragment());
-        transaction.commit();
+        viewPager = (ViewPager) v.findViewById(R.id.viewPager);
+        navigation = (BottomNavigationView) v.findViewById(R.id.navigation);
+
+        viewPager.setAdapter(new BasePagerAdapter(getChildFragmentManager(), new ChannelsFragment(), new InstantsFragment()));
+
+        navigation.setOnNavigationItemSelectedListener(this);
+        viewPager.addOnPageChangeListener(this);
 
         return v;
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_channels:
+                if (viewPager.getCurrentItem() != 0)
+                    viewPager.setCurrentItem(0);
+                break;
+            case R.id.action_instant_messages:
+                if (viewPager.getCurrentItem() != 1)
+                    viewPager.setCurrentItem(1);
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        int itemId = position == 0 ? R.id.action_channels : R.id.action_instant_messages;
+        if (navigation.getSelectedItemId() != itemId)
+            navigation.setSelectedItemId(itemId);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

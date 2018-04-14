@@ -15,10 +15,9 @@ import com.afollestad.async.Result;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -121,9 +120,9 @@ public class ButterySlack extends Application {
                             }
                             reader.close();
 
-                            JsonArray array = new Gson().fromJson(json, JsonArray.class);
-                            for (JsonElement object : array) {
-                                emojis.add(EmojiData.from((JsonObject) object));
+                            JSONArray array = (JSONArray) new JSONParser().parse(json);
+                            for (Object object : array) {
+                                emojis.add(EmojiData.from((JSONObject) object));
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
